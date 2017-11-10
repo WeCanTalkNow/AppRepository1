@@ -50,6 +50,7 @@
     <Compile Include="Entities\LogMessage.cs" />
     <Compile Include="Entities\SystemStatus.cs" />
     <Compile Include="Entities\TwilioConferenceCall.cs" />
+    <Compile Include="Entities\User.cs" />
     <Compile Include="TwilioConferenceServices.cs" />
     <Compile Include="TwilloDbContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

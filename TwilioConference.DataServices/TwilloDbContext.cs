@@ -14,7 +14,7 @@ namespace TwilioConference.DataServices
         {
 
         }
-
+        public DbSet<User> User { get; set; }
         public DbSet<TwilioConferenceCall> TwilioConferenceCalls { get; set; }
         public DbSet<LogMessage> LogMessages { get; set; }
     }

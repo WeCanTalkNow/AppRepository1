@@ -22,6 +22,9 @@ namespace TwilioConference.Controllers
         static readonly string TWILIO_NUMBER = ConfigurationManager.AppSettings["TWILIO_NUMBER"];
 
         //To get the location the assembly normally resides on disk or the install directory
+        static string strTargetTimeZoneID = "";
+        static string strTwilioPhoneNumber = "14159186634";
+        static Boolean AVAILABILITY_CHECK_DONE = false;
         static string WEBROOT_PATH = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
         static string WEB_BIN_ROOT = System.IO.Path.GetDirectoryName(WEBROOT_PATH);
         static string WEB_JOBS_DIRECTORY = System.IO.Path.GetFullPath("D:\\home\\site\\wwwroot\\app_data\\jobs\\triggered\\TwilioConferenceTimer\\Webjob");
@@ -58,6 +61,45 @@ namespace TwilioConference.Controllers
         {
             var response = new VoiceResponse();
             string from = request.From;
+            string strCallServiceUserName = "";
+            string strUserDialToPhoneNumber = "";                       
+            Boolean IsUserAvailableToTakeCalls = true;
+             
+            if (!AVAILABILITY_CHECK_DONE)
+            {
+                try
+                {
+                    conferenceServices.LogMessage("In availability check");
+                    IsUserAvailableToTakeCalls = conferenceServices.
+                            CheckAvailabilityAndFetchDetails(
+                                ref strCallServiceUserName,
+                                        ref strUserDialToPhoneNumber,
+                                            ref strTargetTimeZoneID,
+                                                    strTwilioPhoneNumber);
+                    conferenceServices.LogMessage("Availability check done");
+                    //conferenceServices.LogMessage(string.Format("strTwilioPhoneNumber {0} strCallFromPhoneNumber, {1} strCallServiceUserName {2} IsUserAvailableToTakeCalls {3} strUserDialToPhoneNumber {4}",
+                    //                                             strTwilioPhoneNumber, strCallFromPhoneNumber, strCallServiceUserName, IsUserAvailableToTakeCalls, strUserDialToPhoneNumber));
+
+                    AVAILABILITY_CHECK_DONE = true;
+                    if (!IsUserAvailableToTakeCalls)
+                    {
+                        response.Say(string.Concat(strCallServiceUserName,
+                                      "is not available to take calls at this time. ",
+                                       "Please check back with this user about their available call times"));
+                        response.Hangup();
+                        return TwiML(response);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //conferenceServices.ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
+                    //    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+                }
+            }
+
+
+
+
 
             if (from.Contains("4159186649"))
             {
@@ -84,7 +126,7 @@ namespace TwilioConference.Controllers
                 // On first call the control flow should be here
                 conferenceServices.LogMessage("Connected from " + from);
                 string phone1 = from; // This is phone1 the person that calls the twilo number
-                string phone2 = "+15109230722"; //You would get this from the database in advance. This is phone 2 your known number.
+                string phone2 = "+911142345253"; //You would get this from the database in advance. This is phone 2 your known number.
                 
                 string conferenceName = GetRandomConferenceName(); // Step 2.
                 

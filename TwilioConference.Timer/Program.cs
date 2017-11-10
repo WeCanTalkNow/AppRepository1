@@ -31,7 +31,7 @@ namespace TwilioConference.Timer
             DateTimeOffset messageOffset = DateTime.Now.AddMinutes(.5);
             conferenceServices.LogMessage(string.Format("9 minute timer will execute at :{0}",messageOffset), id);
             //Get 10 minutes from when conference id was passed in
-            DateTimeOffset hangUpOffset = DateTime.Now.AddMinutes(2);
+            DateTimeOffset hangUpOffset = DateTime.Now.AddMinutes(1);
             conferenceServices.LogMessage(string.Format("10 minute timer will execute at :{0}", hangUpOffset), id);
 
             try

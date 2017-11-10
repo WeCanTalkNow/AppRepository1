@@ -163,6 +163,38 @@ namespace TwilioConference.DataServices
             }
         }
 
+
+        public bool CheckAvailabilityAndFetchDetails(ref string struserName,
+            ref string strConferenceWithPhoneNumber, ref string strTimeZoneID, 
+                 string strTwilioPhoneNumber)
+        {
+            var retVal = true;
+
+            try
+            {
+                using (var _dbContext = new TwilloDbContext())
+                {
+                    var user =
+                               _dbContext
+                                .User
+                                 .Where(u => u.TwilioPhoneNumber == strTwilioPhoneNumber)
+                                  .FirstOrDefault();
+
+                    struserName = user.UserFullName;
+                    strConferenceWithPhoneNumber = string.Format("+{0}", user.DialToPhoneNumber);
+                    strTimeZoneID = user.IANATimeZone;
+                    retVal = Convert.ToBoolean(user.AvailableStatus);
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return retVal;
+        }
+
+
         public void UpdateCallStartTime(int id)
         {
             using (var _dbContext = new TwilloDbContext())
