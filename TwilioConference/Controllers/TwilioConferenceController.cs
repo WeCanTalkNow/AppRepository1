@@ -236,7 +236,7 @@ namespace TwilioConference.Controllers
             var response = new VoiceResponse();
             conferenceServices.LogMessage("ConnectFromTwilio Bot Called "+ DateTime.Now.ToShortTimeString());
             Response.ContentType = "text/xml";
-            response.Pause(3);
+            //response.Pause(3);
             response.Say("Sorry to interrupt guys but just wanted to let you know that your conference would be ending in 1 minute");
             response.Hangup();            
             return new TwiMLResult(response);
@@ -262,7 +262,7 @@ namespace TwilioConference.Controllers
             TwilioConferenceCall conferenceRecord = conferenceServices.GetConferenceRecord(id);
 
             var response = new VoiceResponse();
-            response.Pause(5);
+            //response.Pause(5);
             response.Say("You are about to join a conference call");
             response.Say("We are going to conference you in with :");
 
