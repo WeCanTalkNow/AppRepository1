@@ -12,6 +12,7 @@ using Twilio.Types;
 using TwilioConference.DataServices;
 using TwilioConference.DataServices.Entities;
 using TwilioConference.Models;
+using NodaTime;
 
 namespace TwilioConference.Controllers
 {
@@ -20,11 +21,14 @@ namespace TwilioConference.Controllers
         static readonly string TWILIO_ACCOUNT_SID = ConfigurationManager.AppSettings["TWILIO_ACCOUNT_SID"];
         static readonly string TWILIO_ACCOUNT_TOKEN = ConfigurationManager.AppSettings["TWILIO_ACCOUNT_TOKEN"];
         static readonly string TWILIO_NUMBER = ConfigurationManager.AppSettings["TWILIO_NUMBER"];
+        private CallResource _crCurrentCall;
+        const string strUTCTimeZoneID = "Etc/UTC";
+        private string _strCallSID;
 
         //To get the location the assembly normally resides on disk or the install directory
         static string strTargetTimeZoneID = "";
         static string strTwilioPhoneNumber = "14159186634";
-        static Boolean AVAILABILITY_CHECK_DONE = false;
+        private static Boolean AVAILABILITY_CHECK_DONE = false;
         static string WEBROOT_PATH = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
         static string WEB_BIN_ROOT = System.IO.Path.GetDirectoryName(WEBROOT_PATH);
         static string WEB_JOBS_DIRECTORY = System.IO.Path.GetFullPath("D:\\home\\site\\wwwroot\\app_data\\jobs\\triggered\\TwilioConferenceTimer\\Webjob");
@@ -123,10 +127,49 @@ namespace TwilioConference.Controllers
             }
             else
             {
+
+                conferenceServices.LogMessage("All checks done");
+                LocalDateTime callStartTime = new
+                            LocalDateTime(crCurrentCall.StartTime.Value.Year,
+                                                crCurrentCall.StartTime.Value.Month,
+                                                    crCurrentCall.StartTime.Value.Day,
+                                                            crCurrentCall.StartTime.Value.Hour,
+                                                                crCurrentCall.StartTime.Value.Minute,
+                                                                        crCurrentCall.StartTime.Value.Second);
+
+                ZonedDateTime utcCallStartTime = callStartTime.InZoneLeniently(dtzsourceDateTime);
+                DateTimeZone tzTargetDateTime = DateTimeZoneProviders.Tzdb[strTargetTimeZoneID];
+                ZonedDateTime targetCallStartTime = utcCallStartTime.WithZone(tzTargetDateTime);
+
+                int intMinutesToPause = 0;
+                int intSecondsToPause = 0;
+                var strHourMessage = string.Empty;
+
+                if (!CallStartTimeMeetsRequirements(
+                    targetCallStartTime.LocalDateTime.Minute,
+                        targetCallStartTime.LocalDateTime.Second,
+                            ref intMinutesToPause,
+                                ref intSecondsToPause,
+                                    ref strHourMessage))
+                {
+                    response.Say("You've reached the Tackle Time line of ");
+                    response.Say(strCallServiceUserName);
+                    response.Say("You will be connected in");
+                    response.Say(intMinutesToPause.ToString());
+                    response.Say("minutes and");
+                    response.Say(intSecondsToPause.ToString());
+                    response.Say(" seconds");
+                    response.Say(strHourMessage);
+                    response.Say("Please hold ");
+                    //voiceResponse.Pause((intMinutesToPause * 60) + intSecondsToPause);
+                }
+
+
+
                 // On first call the control flow should be here
                 conferenceServices.LogMessage("Connected from " + from);
                 string phone1 = from; // This is phone1 the person that calls the twilo number
-                string phone2 = "+911142345253"; //You would get this from the database in advance. This is phone 2 your known number.
+                string phone2 ="+15109230722"; //You would get this from the database in advance. This is phone 2 your known number.
                 
                 string conferenceName = GetRandomConferenceName(); // Step 2.
                 
@@ -230,6 +273,12 @@ namespace TwilioConference.Controllers
             return new TwiMLResult();
         }
 
+        public DateTimeZone dtzsourceDateTime
+        {
+            get { return DateTimeZoneProviders.Tzdb[strUTCTimeZoneID]; }
+        }
+
+
         //[System.Web.Mvc.HttpPost]
         public ActionResult ConnectTwilioBot(VoiceRequest request)
         {
@@ -277,6 +326,94 @@ namespace TwilioConference.Controllers
 
             return new TwiMLResult(response);
         }
+
+        private bool CallStartTimeMeetsRequirements
+                              (int zdtCallStartMinute,
+                                   int zdtCallStartSecond,
+                                        ref int intMinutesToPause,
+                                            ref int intSecondsToPause,
+                                              ref string strHourMessage)
+        {
+            var retVal = false;
+
+            var blnCallStartTimeAtTimeSlot =
+                ((zdtCallStartMinute % 10) == 0)          // The start minute is either exactly at  00 / 10 / 20 / 30 / 40 / 50 past the hour
+                ||                                        // OR
+                ((zdtCallStartMinute - 1) % 10) == 0;     // The start minute is within a minute of 00 / 10 / 20 / 30 / 40 / 50 past the hour
+
+            switch (blnCallStartTimeAtTimeSlot)
+            {
+                case true:
+                    retVal = true;
+                    break;
+
+                case false:
+                    // Find total absolute seconds of call start time     
+                    var intCallStartTotalSeconds =
+                        zdtCallStartSecond             //Second the call started
+                          + (zdtCallStartMinute * 60); //Minute the call started
+
+                    // Fid time slot end
+                    var div = zdtCallStartMinute / 10;
+                    var timeslotend = (10 * div) + 10;
+
+                    switch (timeslotend)
+                    {
+                        case 60:
+                            strHourMessage = "at the Top of the hour";
+                            break;
+                        case 10:
+                            strHourMessage = "at ten minutes past the hour";
+                            break;
+                        case 20:
+                            strHourMessage = "at twenty minutes past the hour";
+                            break;
+                        case 30:
+                            strHourMessage = "at thirty minutes past the hour";
+                            break;
+                        case 40:
+                            strHourMessage = "at fourty minutes past the hour";
+                            break;
+                        case 50:
+                            strHourMessage = "at fifty minutes past the hour";
+                            break;
+                    }
+
+
+                    // Find total absolute seconds of call slot end time
+                    var intCallSlotEndTotalSeconds = timeslotend * 60;
+
+                    // Cover to minutes & seconds
+                    intMinutesToPause = (intCallSlotEndTotalSeconds - intCallStartTotalSeconds) / 60;
+                    intSecondsToPause = (intCallSlotEndTotalSeconds - intCallStartTotalSeconds) % 60;
+                    break;
+            }
+            return retVal;
+        }
+
+        internal CallResource crCurrentCall
+        {
+            get
+            {
+                _crCurrentCall = _crCurrentCall ??
+                     CallResource.Fetch(strCallSID);
+                return _crCurrentCall;
+            }
+        }
+
+        internal string strCallSID
+        {
+            get
+            {
+                _strCallSID = _strCallSID ??
+                        (!string.IsNullOrEmpty(Request.Params["CallSid"])
+                        ? Request.Params["CallSid"].ToString()
+                        : string.Empty);
+
+                return _strCallSID;
+            }
+        }
+
 
         //internal string strCallerId
         //{
