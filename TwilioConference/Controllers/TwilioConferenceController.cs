@@ -20,27 +20,22 @@ namespace TwilioConference.Controllers
     {
         static readonly string TWILIO_ACCOUNT_SID = ConfigurationManager.AppSettings["TWILIO_ACCOUNT_SID"];
         static readonly string TWILIO_ACCOUNT_TOKEN = ConfigurationManager.AppSettings["TWILIO_ACCOUNT_TOKEN"];
-        static readonly string TWILIO_NUMBER = ConfigurationManager.AppSettings["TWILIO_NUMBER"];
-        private CallResource _crCurrentCall;
-        const string strUTCTimeZoneID = "Etc/UTC";
-        private string _strCallSID;
+        static readonly string TWILIO_CONFERENCE_NUMBER = ConfigurationManager.AppSettings["TWILIO_CONFERENCE_NUMBER"];
+        static readonly string WEBROOT_PATH = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
+        static readonly string WEB_BIN_ROOT = System.IO.Path.GetDirectoryName(WEBROOT_PATH);
+        static readonly string WEB_JOBS_DIRECTORY = System.IO.Path.GetFullPath("D:\\home\\site\\wwwroot\\app_data\\jobs\\triggered\\TwilioConferenceTimer\\Webjob");
 
         //To get the location the assembly normally resides on disk or the install directory
-        static string strTargetTimeZoneID = "";
-        static string strTwilioPhoneNumber = "14159157316";
+        static readonly string TIMER_EXE = Path.Combine(WEB_JOBS_DIRECTORY, "TwilioConference.Timer.exe");
+        const string strUTCTimeZoneID = "Etc/UTC";
+
+        private CallResource _crCurrentCall;        
+        private string _strCallSID;        
+        static string strTargetTimeZoneID = "";        
         private Boolean AVAILABILITY_CHECK_DONE = false;
         private string strCallServiceUserName = "";
-        static string WEBROOT_PATH = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
-        static string WEB_BIN_ROOT = System.IO.Path.GetDirectoryName(WEBROOT_PATH);
-        static string WEB_JOBS_DIRECTORY = System.IO.Path.GetFullPath("D:\\home\\site\\wwwroot\\app_data\\jobs\\triggered\\TwilioConferenceTimer\\Webjob");
-        //D:\home\site\wwwroot\app_data\jobs\triggered\TwilioConferenceTimer
-        //D:\home\site\wwwroot\App_Data\jobs\triggered\TwilioConferenceTimer\Webjob
-
-        static string TIMER_EXE = Path.Combine(WEB_JOBS_DIRECTORY, "TwilioConference.Timer.exe");
 
         TwilioConferenceServices conferenceServices;
-        //private CallResource _crCurrentCall;
-        //private string _strCallSID;
         //private string _strCallerID;
 
 
@@ -67,7 +62,6 @@ namespace TwilioConference.Controllers
         {
             var response = new VoiceResponse();
             string from = request.From;
-            //string strCallServiceUserName = "";
             string strUserDialToPhoneNumber = "";                       
             Boolean IsUserAvailableToTakeCalls = true;
              
@@ -81,7 +75,7 @@ namespace TwilioConference.Controllers
                                 ref strCallServiceUserName,
                                         ref strUserDialToPhoneNumber,
                                             ref strTargetTimeZoneID,
-                                                    strTwilioPhoneNumber);
+                                                    TWILIO_CONFERENCE_NUMBER);
                     conferenceServices.LogMessage("Availability check done");
                     //conferenceServices.LogMessage(string.Format("strTwilioPhoneNumber {0} strCallFromPhoneNumber, {1} strCallServiceUserName {2} IsUserAvailableToTakeCalls {3} strUserDialToPhoneNumber {4}",
                     //                                             strTwilioPhoneNumber, strCallFromPhoneNumber, strCallServiceUserName, IsUserAvailableToTakeCalls, strUserDialToPhoneNumber));
@@ -293,7 +287,7 @@ namespace TwilioConference.Controllers
         {
             var call = CallResource.Create(
                 to: new PhoneNumber(phoneNumber),
-                from: new PhoneNumber(TWILIO_NUMBER),
+                from: new PhoneNumber(TWILIO_CONFERENCE_NUMBER),
                 url: new Uri(string.Format("http://callingserviceconferenceapp.azurewebsites.net/twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}" // 5.
                 , conferenceName, conferenceRecordId)));//new System.Uri("/response.xml", System.UriKind.Relative));
 
