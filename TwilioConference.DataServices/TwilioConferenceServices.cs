@@ -165,8 +165,8 @@ namespace TwilioConference.DataServices
 
 
         public bool CheckAvailabilityAndFetchDetails(ref string struserName,
-            ref string strConferenceWithPhoneNumber, ref string strTimeZoneID, 
-                 string strTwilioPhoneNumber)
+            ref string Service_User_Conference_With_Number, ref string strTimeZoneID, 
+                 string Service_User_Twilio_Phone_Number)
         {
             var retVal = true;
 
@@ -177,11 +177,11 @@ namespace TwilioConference.DataServices
                     var user =
                                _dbContext
                                 .User
-                                 .Where(u => u.TwilioPhoneNumber == strTwilioPhoneNumber)
+                                 .Where(u => u.Service_User_Twilio_Phone_Number == Service_User_Twilio_Phone_Number)
                                   .FirstOrDefault();
 
                     struserName = user.UserFullName;
-                    strConferenceWithPhoneNumber = string.Format("+{0}", user.DialToPhoneNumber);
+                    Service_User_Conference_With_Number = user.Service_User_Conference_With_Number;
                     strTimeZoneID = user.IANATimeZone;
                     retVal = Convert.ToBoolean(user.AvailableStatus);
                 }

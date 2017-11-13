@@ -37,7 +37,7 @@ namespace TwilioConference.Timer
 
             //TwilioClient.Init(twilloAccountSid, twilloAccountToken);
             //TwilioClient.Init("ACb8962de6df9de99d4a711879eccd0cab", "8b60eca3f36b9cfdf4ba9c6ef1877a8c");
-            string connectUrl = "http://callingserviceconferenceapp.azurewebsites.net/twilioconference/ConnectTwilioBot";
+            string connectUrl = "http://callingserviceconference.azurewebsites.net/twilioconference/ConnectTwilioBot";
             try
             {
 
@@ -49,7 +49,7 @@ namespace TwilioConference.Timer
                 myReq.Headers["Authorization"] = "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes(credentials));
                 string formencodeddata = string.Format("To=+1{0}&From=+1{1}&Url={2}"
                     , Constants.TWILIO_CONFERENCE_NUMBER
-                    , "4159656328"
+                    , "4159186649"
                     , connectUrl);
                 byte[] formbytes = System.Text.ASCIIEncoding.Default.GetBytes(formencodeddata);
                 myReq.Method = "POST";

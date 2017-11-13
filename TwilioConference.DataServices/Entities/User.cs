@@ -17,11 +17,11 @@ namespace TwilioConference.DataServices.Entities
 
         [Column(TypeName = "NVARCHAR")]
         [StringLength(15)]
-        public virtual string DialToPhoneNumber { get; set; }
+        public virtual string Service_User_Conference_With_Number { get; set; }
 
         [Column(TypeName = "NVARCHAR")]
         [StringLength(15)]
-        public virtual string TwilioPhoneNumber { get; set; }
+        public virtual string Service_User_Twilio_Phone_Number { get; set; }
 
         [Column(TypeName = "BIT")]
         public virtual Boolean AvailableStatus { get; set; }
