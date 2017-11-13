@@ -27,8 +27,9 @@ namespace TwilioConference.Controllers
 
         //To get the location the assembly normally resides on disk or the install directory
         static string strTargetTimeZoneID = "";
-        static string strTwilioPhoneNumber = "14159186634";
-        private static Boolean AVAILABILITY_CHECK_DONE = false;
+        static string strTwilioPhoneNumber = "14159157316";
+        private Boolean AVAILABILITY_CHECK_DONE = false;
+        private string strCallServiceUserName = "";
         static string WEBROOT_PATH = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
         static string WEB_BIN_ROOT = System.IO.Path.GetDirectoryName(WEBROOT_PATH);
         static string WEB_JOBS_DIRECTORY = System.IO.Path.GetFullPath("D:\\home\\site\\wwwroot\\app_data\\jobs\\triggered\\TwilioConferenceTimer\\Webjob");
@@ -47,6 +48,7 @@ namespace TwilioConference.Controllers
         {
             TwilioClient.Init(TWILIO_ACCOUNT_SID, TWILIO_ACCOUNT_TOKEN);
             conferenceServices = new TwilioConferenceServices();
+            conferenceServices.LogMessage("In contructor");
         }
 
         // Step 1. Person1 calls Twilio number 1 (connects to /Connect api)
@@ -65,7 +67,7 @@ namespace TwilioConference.Controllers
         {
             var response = new VoiceResponse();
             string from = request.From;
-            string strCallServiceUserName = "";
+            //string strCallServiceUserName = "";
             string strUserDialToPhoneNumber = "";                       
             Boolean IsUserAvailableToTakeCalls = true;
              
@@ -100,12 +102,8 @@ namespace TwilioConference.Controllers
                     //    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
                 }
             }
-
-
-
-
-
-            if (from.Contains("4159186649"))
+            
+            if (from.Contains("4159656328"))
             {
                 conferenceServices.LogMessage("Connected from TWILIO NUMBER controller");
                 string conferenceName = "mango";
@@ -169,7 +167,7 @@ namespace TwilioConference.Controllers
                 // On first call the control flow should be here
                 conferenceServices.LogMessage("Connected from " + from);
                 string phone1 = from; // This is phone1 the person that calls the twilo number
-                string phone2 ="+15109230722"; //You would get this from the database in advance. This is phone 2 your known number.
+                string phone2 ="+911142345253"; //You would get this from the database in advance. This is phone 2 your known number.
                 
                 string conferenceName = GetRandomConferenceName(); // Step 2.
                 
@@ -190,7 +188,7 @@ namespace TwilioConference.Controllers
                 dial.Conference(conferenceName
                     , waitUrl: "http://twimlets.com/holdmusic?Bucket=com.twilio.music.ambient"
                     , statusCallbackEvent: "start end join"
-                    , statusCallback: string.Format("http://callingserviceconference.azurewebsites.net/twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id)
+                    , statusCallback: string.Format("http://callingserviceconferenceapp.azurewebsites.net/twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id)
                     , statusCallbackMethod: "POST"
                     , startConferenceOnEnter: true
                     , endConferenceOnExit: true);
@@ -296,7 +294,7 @@ namespace TwilioConference.Controllers
             var call = CallResource.Create(
                 to: new PhoneNumber(phoneNumber),
                 from: new PhoneNumber(TWILIO_NUMBER),
-                url: new Uri(string.Format("http://callingserviceconference.azurewebsites.net/twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}" // 5.
+                url: new Uri(string.Format("http://callingserviceconferenceapp.azurewebsites.net/twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}" // 5.
                 , conferenceName, conferenceRecordId)));//new System.Uri("/response.xml", System.UriKind.Relative));
 
             return call.Sid;
