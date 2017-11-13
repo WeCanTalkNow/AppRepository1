@@ -21,9 +21,11 @@ namespace TwilioConference.Controllers
         static readonly string TWILIO_ACCOUNT_SID = ConfigurationManager.AppSettings["TWILIO_ACCOUNT_SID"];
         static readonly string TWILIO_ACCOUNT_TOKEN = ConfigurationManager.AppSettings["TWILIO_ACCOUNT_TOKEN"];
         static readonly string TWILIO_CONFERENCE_NUMBER = ConfigurationManager.AppSettings["TWILIO_CONFERENCE_NUMBER"];
+        static readonly string TWILIO_BOT_NUMBER = ConfigurationManager.AppSettings["TWILIO_BOT_NUMBER"];
         static readonly string WEBROOT_PATH = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
         static readonly string WEB_BIN_ROOT = System.IO.Path.GetDirectoryName(WEBROOT_PATH);
         static readonly string WEB_JOBS_DIRECTORY = System.IO.Path.GetFullPath("D:\\home\\site\\wwwroot\\app_data\\jobs\\triggered\\TwilioConferenceTimer\\Webjob");
+        static readonly string PHONE_PREFIX = "1"; // change this with relevant ISD code before compiling in case of NON-US based testing
 
         //To get the location the assembly normally resides on disk or the install directory
         static readonly string TIMER_EXE = Path.Combine(WEB_JOBS_DIRECTORY, "TwilioConference.Timer.exe");
@@ -75,7 +77,7 @@ namespace TwilioConference.Controllers
                                 ref strCallServiceUserName,
                                         ref strUserDialToPhoneNumber,
                                             ref strTargetTimeZoneID,
-                                                    TWILIO_CONFERENCE_NUMBER);
+                                                    TWILIO_CONFERENCE_NUMBER);  
                     conferenceServices.LogMessage("Availability check done");
                     //conferenceServices.LogMessage(string.Format("strTwilioPhoneNumber {0} strCallFromPhoneNumber, {1} strCallServiceUserName {2} IsUserAvailableToTakeCalls {3} strUserDialToPhoneNumber {4}",
                     //                                             strTwilioPhoneNumber, strCallFromPhoneNumber, strCallServiceUserName, IsUserAvailableToTakeCalls, strUserDialToPhoneNumber));
@@ -97,7 +99,7 @@ namespace TwilioConference.Controllers
                 }
             }
             
-            if (from.Contains("4159656328"))
+            if (from.Contains(TWILIO_BOT_NUMBER))
             {
                 conferenceServices.LogMessage("Connected from TWILIO NUMBER controller");
                 string conferenceName = "mango";
@@ -287,7 +289,8 @@ namespace TwilioConference.Controllers
         {
             var call = CallResource.Create(
                 to: new PhoneNumber(phoneNumber),
-                from: new PhoneNumber(TWILIO_CONFERENCE_NUMBER),
+                from: new PhoneNumber(
+                    string.Format(PHONE_PREFIX+"{0}",TWILIO_CONFERENCE_NUMBER)),
                 url: new Uri(string.Format("http://callingserviceconferenceapp.azurewebsites.net/twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}" // 5.
                 , conferenceName, conferenceRecordId)));//new System.Uri("/response.xml", System.UriKind.Relative));
 
