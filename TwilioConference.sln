@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwilioConference", "TwilioConference\TwilioConference.csproj", "{4C6C7D88-1002-4AF3-A23E-534EF7602936}"
 EndProject
@@ -10,6 +10,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwilioConference.DataServices", "TwilioConference.DataServices\TwilioConference.DataServices.csproj", "{3B3F9A89-1EF1-440D-ADFF-11B2E2F658DB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwilioConference.IntegrationTest", "TwilioConference.IntegrationTest\TwilioConference.IntegrationTest.csproj", "{C2818667-D52F-4E86-A732-AD71D7D788DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CallingService.SMS", "TwilioConference.SMS\CallingService.SMS.csproj", "{B9A789D7-8068-4B26-BF85-BEF64F0A6FF8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3B3F9A89-1EF1-440D-ADFF-11B2E2F658DB} = {3B3F9A89-1EF1-440D-ADFF-11B2E2F658DB}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +38,10 @@ Global
 		{C2818667-D52F-4E86-A732-AD71D7D788DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2818667-D52F-4E86-A732-AD71D7D788DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2818667-D52F-4E86-A732-AD71D7D788DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9A789D7-8068-4B26-BF85-BEF64F0A6FF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9A789D7-8068-4B26-BF85-BEF64F0A6FF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9A789D7-8068-4B26-BF85-BEF64F0A6FF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9A789D7-8068-4B26-BF85-BEF64F0A6FF8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

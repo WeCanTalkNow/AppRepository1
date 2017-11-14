@@ -194,6 +194,71 @@ namespace TwilioConference.DataServices
             return retVal;
         }
 
+        public  string returnStatus(string twilioPhoneNumber)
+        {
+            var retVal = String.Empty;
+
+            using (var context = new TwilloDbContext())
+            {
+                var user =
+                            context
+                            .User
+                                .Where(u => u.Service_User_Twilio_Phone_Number == twilioPhoneNumber.ToString().Substring(1)).FirstOrDefault();
+
+                retVal = Convert.ToBoolean(user.AvailableStatus) ? "Available" : "Not Available";
+            }
+            return retVal;
+        }
+
+        public  string updateStatus(Int16 requiredStatus, string twilioPhoneNumber)
+        {
+            var retVal = string.Empty;
+
+            using (var context = new TwilloDbContext())
+            {
+                var user =
+                            context
+                            .User
+                                .Where(u => u.Service_User_Conference_With_Number == twilioPhoneNumber.ToString().Substring(1)).FirstOrDefault();
+
+                switch (Convert.ToBoolean(requiredStatus))
+                {
+                    case true:
+                        {
+                            if ((user.AvailableStatus) == true)
+                                retVal = "Status is already Available";
+                            // Do nothing
+                            else
+                            {
+                                user.AvailableStatus = true;
+                                context.SaveChanges();
+                                retVal = "Status is now set to Available";
+                            }
+                        }
+                        break;
+                    case false:
+                        {
+                            if ((user.AvailableStatus) == false)
+                                retVal = "Status is already Not Available";
+                            // Do nothing
+                            else
+                            {
+                                user.AvailableStatus = false;
+                                context.SaveChanges();
+                                retVal = "Status is now set to Not Available";
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+            return retVal;
+        }
+
+
+
 
         public void UpdateCallStartTime(int id)
         {
