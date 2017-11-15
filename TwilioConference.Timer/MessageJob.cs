@@ -24,19 +24,22 @@ namespace TwilioConference.Timer
             string twilloAccountSid = dataMap.GetString("twilloAccountSid");
             string twilloAccountToken = dataMap.GetString("twilloAccountToken");
             string callSid = dataMap.GetString("callSid");
+            string SERVICE_USER_TWILIO_PHONE_NUMBER = dataMap.GetString("serviceUserTwilioPhoneNumber");
+            string TWILIO_BOT_NUMBER = dataMap.GetString("twilioBotNumber");
+
             int id = dataMap.GetInt("id");
             string conferenceName = dataMap.GetString("conferenceName");
             string dataMapValues =
-                string.Format("1. {0}|2. {1}|3. {2}|4. {3}|5. {4}|"
+                string.Format("1. {0}|2. {1}|3. {2}|4. {3}|5. {4}|6. {5}||7. {6}|"
                , twilloAccountSid
                , twilloAccountToken
                , callSid
                , id
-               , conferenceName);
+               , conferenceName
+               , SERVICE_USER_TWILIO_PHONE_NUMBER
+               , TWILIO_BOT_NUMBER);
             conferenceServices.LogMessage(dataMapValues, id);
 
-            //TwilioClient.Init(twilloAccountSid, twilloAccountToken);
-            //TwilioClient.Init("ACb8962de6df9de99d4a711879eccd0cab", "8b60eca3f36b9cfdf4ba9c6ef1877a8c");
             string connectUrl = "http://callingserviceconference.azurewebsites.net/twilioconference/ConnectTwilioBot";
             try
             {
@@ -48,8 +51,8 @@ namespace TwilioConference.Timer
                 CredentialCache mycache = new CredentialCache();
                 myReq.Headers["Authorization"] = "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes(credentials));
                 string formencodeddata = string.Format("To=+1{0}&From=+1{1}&Url={2}"
-                    , Constants.TWILIO_CONFERENCE_NUMBER
-                    , "4159656328"  // "4159186649"
+                    , SERVICE_USER_TWILIO_PHONE_NUMBER
+                    , TWILIO_BOT_NUMBER
                     , connectUrl);
                 byte[] formbytes = System.Text.ASCIIEncoding.Default.GetBytes(formencodeddata);
                 myReq.Method = "POST";

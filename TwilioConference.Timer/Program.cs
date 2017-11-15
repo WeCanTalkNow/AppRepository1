@@ -21,8 +21,10 @@ namespace TwilioConference.Timer
             conferenceServices.LogMessage("Entered TwilioConference.Timer at " + DateTime.Now.ToString(), id);
             string TWILIO_ACCOUNT_SID = ConfigurationManager.AppSettings["TWILIO_ACCOUNT_SID"];
             string TWILIO_ACCOUNT_TOKEN = ConfigurationManager.AppSettings["TWILIO_ACCOUNT_TOKEN"];
-            string TWILIO_NUMBER = ConfigurationManager.AppSettings["TWILIO_NUMBER"];
-            
+
+            string SERVICE_USER_TWILIO_PHONE_NUMBER = ConfigurationManager.AppSettings["SERVICE_USER_TWILIO_PHONE_NUMBER"];
+            string TWILIO_BOT_NUMBER = ConfigurationManager.AppSettings["TWILIO_BOT_NUMBER"];
+
             //string callSid = "CAbe07f2cc9faea5a9a7e832db7e4fa239";
             string conferenceSid = conferenceServices.GetConferenceRecord(id).ConferenceSID;
             conferenceServices.LogMessage("Conference id is: "+conferenceSid + " TwilioConference.Timer", id);
@@ -47,12 +49,14 @@ namespace TwilioConference.Timer
 
                 IJobDetail messageNotificationJobDetail =
                     JobBuilder.Create<MessageJob>()
-                    .WithIdentity("HangUpAt9MinuteMessageJob", "TwilioGroup")
+                    .WithIdentity("MessageJob", "TwilioGroup")
                     .UsingJobData("callSid", conferenceSid)
                     .UsingJobData("twilloAccountSid", TWILIO_ACCOUNT_SID)
                     .UsingJobData("twilloAccountToken", TWILIO_ACCOUNT_TOKEN)
                     .UsingJobData("id", id)
                     .UsingJobData("conferenceName", conferenceName)
+                    .UsingJobData("serviceUserTwilioPhoneNumber", SERVICE_USER_TWILIO_PHONE_NUMBER)
+                    .UsingJobData("twilioBotNumber", TWILIO_BOT_NUMBER)
                     .Build();
 
                 //IJobDetail messageNotificationJobDetail =
