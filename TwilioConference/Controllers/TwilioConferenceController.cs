@@ -175,8 +175,10 @@ namespace TwilioConference.Controllers
                     conferenceServices
                     .CreateTwilioConferenceRecord(phone1, phone2, conferenceName, request.CallSid);
 
-                response.Say("You are about to join a conference call");
-                response.Say("We are going to conference you in with :");
+                //response.Say("You are about to join a conference call");
+                //response.Say("We are going to conference you in with :");
+
+                response.Say("Connecting Now");
 
                 foreach (var digit in conferenceRecord.Phone2)
                 {
@@ -284,7 +286,7 @@ namespace TwilioConference.Controllers
             conferenceServices.LogMessage("ConnectFromTwilio Bot Called "+ DateTime.Now.ToShortTimeString());
             Response.ContentType = "text/xml";
             //response.Pause(3);
-            response.Say("Sorry to interrupt guys but just wanted to let you know that your conference would be ending in 1 minute");
+            response.Say("This conference call will be endng in 1 minute");
             response.Hangup();            
             return new TwiMLResult(response);
         }
