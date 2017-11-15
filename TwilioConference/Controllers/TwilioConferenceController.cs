@@ -160,6 +160,7 @@ namespace TwilioConference.Controllers
                     response.Say(intSecondsToPause.ToString());
                     response.Say(" seconds");
                     response.Say(strHourMessage);
+                    response.Pause(1);
                     response.Say("Please hold ");
                     //voiceResponse.Pause((intMinutesToPause * 60) + intSecondsToPause);
                 }
@@ -392,19 +393,19 @@ namespace TwilioConference.Controllers
             return retVal;
         }
 
-        [HttpPost]
-        public ActionResult Check()
-        {
-            var response = new MessagingResponse();
-            var message = new Message();
-            var strResponse = string.Empty;
-            conferenceServices.LogMessage(string.Format("In check {0}",twilioPhoneNumber));
+        //[HttpPost]
+        //public ActionResult Check()
+        //{
+        //    var response = new MessagingResponse();
+        //    var message = new Message();
+        //    var strResponse = string.Empty;
+        //    conferenceServices.LogMessage(string.Format("In check {0}",twilioPhoneNumber));
 
-            strResponse = EvaluateMessage(smsMessageContents);
-            response.Message(strResponse, smsFromPhonenumber, twilioPhoneNumber);
-            conferenceServices.LogMessage(string.Format("In Check {0},{1},{2}",strResponse,smsFromPhonenumber,twilioPhoneNumber));
-            return TwiML(response);
-        }
+        //    strResponse = EvaluateMessage(smsMessageContents);
+        //    response.Message(strResponse, smsFromPhonenumber, twilioPhoneNumber);
+        //    conferenceServices.LogMessage(string.Format("In Check {0},{1},{2}",strResponse,smsFromPhonenumber,twilioPhoneNumber));
+        //    return TwiML(response);
+        //}
 
         public string smsMessageContents
         {
@@ -422,30 +423,30 @@ namespace TwilioConference.Controllers
         }
 
 
-        private string EvaluateMessage(string smsMessageContents)
-        {
-            string strResponse;
-            conferenceServices.LogMessage(string.Format("Evaluate message {0} {1}", twilioPhoneNumber, smsMessageContents));
-            switch (smsMessageContents.ToUpper().Trim())
-            {
-                case "STATUS":   // Return current status
-                    strResponse = conferenceServices.returnStatus(twilioPhoneNumber);
-                    break;
+        //private string EvaluateMessage(string smsMessageContents)
+        //{
+        //    string strResponse;
+        //    conferenceServices.LogMessage(string.Format("Evaluate message {0} {1}", twilioPhoneNumber, smsMessageContents));
+        //    switch (smsMessageContents.ToUpper().Trim())
+        //    {
+        //        case "STATUS":   // Return current status
+        //            strResponse = conferenceServices.returnStatus(twilioPhoneNumber);
+        //            break;
 
-                case "STATUS 1": // Update Status to Available
-                    strResponse = conferenceServices.updateStatus(1, twilioPhoneNumber);
-                    break;
+        //        case "STATUS 1": // Update Status to Available
+        //            strResponse = conferenceServices.updateStatus(1, twilioPhoneNumber);
+        //            break;
 
-                case "STATUS 0": // Update Status to not available
-                    strResponse = conferenceServices.updateStatus(0, twilioPhoneNumber);
-                    break;
+        //        case "STATUS 0": // Update Status to not available
+        //            strResponse = conferenceServices.updateStatus(0, twilioPhoneNumber);
+        //            break;
 
-                default:
-                    strResponse = "Invalid Command. Keywords are Status = retrieving status, Status 0 =  updating status to not available, status 1 =  updating status to available";
-                    break;
-            }
-            return strResponse;
-        }
+        //        default:
+        //            strResponse = "Invalid Command. Keywords are Status = retrieving status, Status 0 =  updating status to not available, status 1 =  updating status to available";
+        //            break;
+        //    }
+        //    return strResponse;
+        //}
 
 
         internal CallResource crCurrentCall
