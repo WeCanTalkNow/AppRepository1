@@ -246,15 +246,8 @@
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Properties\PublishProfiles\CallingServiceConference - Web Deploy %283%29.pubxml" />
-    <None Include="Properties\PublishProfiles\CallingServiceConference - Web Deploy %284%29.pubxml" />
     <None Include="Properties\PublishProfiles\CallingServiceConference - Web Deploy.pubxml" />
-    <None Include="Properties\PublishProfiles\CallingServiceConferenceApp - Web Deploy.pubxml" />
-    <None Include="Properties\PublishProfiles\CallingServiceSMS - Web Deploy.pubxml" />
-    <None Include="Properties\PublishProfiles\CallingServiceSMS.pubxml" />
-    <None Include="Properties\PublishProfiles\CallingServiceSMSApp - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
-    <None Include="Properties\PublishProfiles\ForTestApp - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />

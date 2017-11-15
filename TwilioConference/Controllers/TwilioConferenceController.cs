@@ -176,15 +176,9 @@ namespace TwilioConference.Controllers
                     conferenceServices
                     .CreateTwilioConferenceRecord(phone1, phone2, conferenceName, request.CallSid);
 
-                //response.Say("You are about to join a conference call");
-                //response.Say("We are going to conference you in with :");
-
+                response.Pause(1);
                 response.Say("Connecting Now");
 
-                foreach (var digit in conferenceRecord.Phone2)
-                {
-                    response.Say(digit.ToString());
-                }
                 
                 // Connect phone1 to conference // 3.
                 var dial = new Dial();
