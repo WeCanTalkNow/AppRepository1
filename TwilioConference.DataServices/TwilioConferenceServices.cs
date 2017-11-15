@@ -203,7 +203,7 @@ namespace TwilioConference.DataServices
                 var user =
                             context
                             .User
-                                .Where(u => u.Service_User_Twilio_Phone_Number == twilioPhoneNumber.ToString().Substring(1)).FirstOrDefault();
+                                .Where(u => u.Service_User_Twilio_Phone_Number == twilioPhoneNumber.ToString().Substring(2)).FirstOrDefault();
 
                 retVal = Convert.ToBoolean(user.AvailableStatus) ? "Available" : "Not Available";
             }
@@ -213,13 +213,13 @@ namespace TwilioConference.DataServices
         public  string updateStatus(Int16 requiredStatus, string twilioPhoneNumber)
         {
             var retVal = string.Empty;
-
+           
             using (var context = new TwilloDbContext())
             {
                 var user =
                             context
                             .User
-                                .Where(u => u.Service_User_Conference_With_Number == twilioPhoneNumber.ToString().Substring(1)).FirstOrDefault();
+                                .Where(u => u.Service_User_Twilio_Phone_Number == twilioPhoneNumber.ToString().Substring(2)).FirstOrDefault();
 
                 switch (Convert.ToBoolean(requiredStatus))
                 {

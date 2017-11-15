@@ -11,11 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwilioConference.DataServic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwilioConference.IntegrationTest", "TwilioConference.IntegrationTest\TwilioConference.IntegrationTest.csproj", "{C2818667-D52F-4E86-A732-AD71D7D788DA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CallingService.SMS", "TwilioConference.SMS\CallingService.SMS.csproj", "{B9A789D7-8068-4B26-BF85-BEF64F0A6FF8}"
-	ProjectSection(ProjectDependencies) = postProject
-		{3B3F9A89-1EF1-440D-ADFF-11B2E2F658DB} = {3B3F9A89-1EF1-440D-ADFF-11B2E2F658DB}
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,10 +33,6 @@ Global
 		{C2818667-D52F-4E86-A732-AD71D7D788DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2818667-D52F-4E86-A732-AD71D7D788DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2818667-D52F-4E86-A732-AD71D7D788DA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B9A789D7-8068-4B26-BF85-BEF64F0A6FF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B9A789D7-8068-4B26-BF85-BEF64F0A6FF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B9A789D7-8068-4B26-BF85-BEF64F0A6FF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B9A789D7-8068-4B26-BF85-BEF64F0A6FF8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,28 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Web;
+using System.Web.Mvc;
 using Twilio.TwiML;
 using Twilio.AspNet.Mvc;
-using System.Web.Mvc;
 using TwilioConference.DataServices;
 
 
-using Twilio.Types;
-
-using Twilio.Rest.Api.V2010.Account;
-using Twilio;
-
-namespace CallingService.SMS.Controllers
+namespace TwilioConference.Controllers
 {
-    public class AvailabilityController : TwilioController
+    public class TwilioSMSController : Controller
     {
+        // GET: TwilioSMS
+
         TwilioConferenceServices twilioConferenceServices;
 
-        public AvailabilityController()
+        public TwilioSMSController()
         {
-            twilioConferenceServices = new TwilioConferenceServices();            
+            twilioConferenceServices = new TwilioConferenceServices();
         }
-
-
 
         [HttpPost]
         public ActionResult Check()
@@ -34,7 +31,7 @@ namespace CallingService.SMS.Controllers
             strResponse = EvaluateMessage(smsMessageContents);
             response.Message(strResponse, smsFromPhonenumber, twilioPhoneNumber);
 
-            return TwiML(response);
+            return T
         }
 
         #region Methods
@@ -45,11 +42,11 @@ namespace CallingService.SMS.Controllers
             switch (smsMessageContents.ToUpper().Trim())
             {
                 case "STATUS":   // Return current status
-                    strResponse =  twilioConferenceServices.returnStatus(twilioPhoneNumber);
+                    strResponse = twilioConferenceServices.returnStatus(twilioPhoneNumber);
                     break;
 
                 case "STATUS 1": // Update Status to Available
-                    strResponse = twilioConferenceServices.updateStatus(1,twilioPhoneNumber);
+                    strResponse = twilioConferenceServices.updateStatus(1, twilioPhoneNumber);
                     break;
 
                 case "STATUS 0": // Update Status to not available
@@ -63,7 +60,7 @@ namespace CallingService.SMS.Controllers
             return strResponse;
         }
 
-         #endregion
+        #endregion
 
         #region Properties
 
@@ -80,9 +77,8 @@ namespace CallingService.SMS.Controllers
         public string smsFromPhonenumber
         {
             get { return (!string.IsNullOrEmpty(Request.Params["From"])) ? Request.Params["From"].ToString() : string.Empty; }
-        } 
-        
+        }
+
         #endregion
     }
-
 }
