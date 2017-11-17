@@ -162,7 +162,7 @@ namespace TwilioConference.Controllers
                     response.Say(strHourMessage);
                     response.Pause(1);
                     response.Say("Please hold ");
-                    //voiceResponse.Pause((intMinutesToPause * 60) + intSecondsToPause);
+                   // response.Pause((intMinutesToPause * 60) + intSecondsToPause);
                 }
 
                 // On first call the control flow should be here
