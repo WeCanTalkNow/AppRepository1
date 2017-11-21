@@ -1,11 +1,7 @@
 ﻿using Quartz;
 using Quartz.Impl;
 using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TwilioConference.DataServices;
 
 namespace TwilioConference.Timer
@@ -20,6 +16,8 @@ namespace TwilioConference.Timer
             //Pass in the ConferenceRecordId
             int id = int.Parse(args[0]);
             string SERVICE_USER_TWILIO_PHONE_NUMBER = args[1];
+            var messageInterval = long.Parse(args[2]);
+            var hangupInterval = long.Parse(args[3]);
 
             conferenceServices.LogMessage("Entered Scheduled Timer at " + DateTime.Now.ToString(), id);
             string TWILIO_ACCOUNT_SID = ConfigurationManager.AppSettings["TWILIO_ACCOUNT_SID"];
@@ -32,12 +30,14 @@ namespace TwilioConference.Timer
             string conferenceSid = conferenceServices.GetConferenceRecord(id).ConferenceSID;
             conferenceServices.LogMessage("Conference id is: "+conferenceSid + " TwilioConference.Timer", id);
 
-            //Get 9 minutes from when conference id was passed in
-            DateTimeOffset messageOffset = DateTime.Now.AddMinutes(.5);
-            conferenceServices.LogMessage(string.Format("9 minute timer will execute at :{0}",messageOffset), id);
-            //Get 10 minutes from when conference id was passed in
-            DateTimeOffset hangUpOffset = DateTime.Now.AddMinutes(1);
-            conferenceServices.LogMessage(string.Format("10 minute timer will execute at :{0}", hangUpOffset), id);
+            //Message offset depending on ticks elapsed since call
+            //DateTimeOffset messageOffset = DateTime.Now.AddMinutes(.5);
+            DateTimeOffset messageOffset = DateTime.Now.AddTicks(messageInterval);
+            conferenceServices.LogMessage(string.Format("Message timer will execute at :{0}",messageOffset), id);
+            //Hangup offset depending on ticks elapsed since call
+            //DateTimeOffset hangUpOffset = DateTime.Now.AddMinutes(1);
+            DateTimeOffset hangUpOffset = DateTime.Now.AddTicks(hangupInterval);
+            conferenceServices.LogMessage(string.Format("Hangup timer will execute at :{0}", hangUpOffset), id);
 
             // construct a scheduler factory
             ISchedulerFactory schedFact = new StdSchedulerFactory();

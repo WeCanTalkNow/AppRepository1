@@ -44,10 +44,12 @@ namespace TwilioConference.Controllers
         const string strUTCTimeZoneID = "Etc/UTC";
         string strTargetTimeZoneID = "";
 
-        private Boolean AVAILABILITY_CHECK_DONE = false;
+        Boolean AVAILABILITY_CHECK_DONE = false;
         private string strCallServiceUserName = "";
         private CallResource _crCurrentCall;        
         private string _strCallSID;
+        private Int64 messageInterval;
+        private Int64 hangupInterval;
 
         private TwilioConferenceServices conferenceServices = new TwilioConferenceServices();
 
@@ -179,8 +181,12 @@ namespace TwilioConference.Controllers
                                     ref intSecondsToPause,
                                         ref strHourMessage);
 
+                     
+
                     if (!callStartTimeMeetsRequirements)
                     {
+                    messageInterval = ((intMinutesToPause * 60) + intSecondsToPause) + (8 * 60);
+                    hangupInterval = ((intMinutesToPause * 60) + intSecondsToPause) + (9 * 60);
                     response.Say("You've reached the Tackle Time line of ");
                     response.Say(strCallServiceUserName);
                     response.Say("You will be connected in");
@@ -191,8 +197,22 @@ namespace TwilioConference.Controllers
                     response.Say(strHourMessage);
                     response.Pause(1);
                     response.Say("Please hold ");
-                   // response.Pause((intMinutesToPause * 60) + intSecondsToPause);
-                    }
+                    // Pause a number of seconds
+                    // response.Pause((intMinutesToPause * 60) + intSecondsToPause);                   
+                   }
+
+                // Resume from here
+                conferenceServices.LogMessage(string.Concat("checking call time values ",
+                                    string.Format("targetCallStartTime {0} " +
+                                      "targetCallStartTime.LocalDateTime.Minute {1} " +
+                                         "targetCallStartTime.LocalDateTime.Second {2} utcCallStartTime {3} tzTargetDateTime {4} Call SID {5}"
+                                      , phoneFrom
+                                        , phoneTo
+                                           , SERVICE_USER_CONFERENCE_WITH_NUMBER
+                                              , callStartTimeMeetsRequirements
+                                                , conferenceName
+                                                   , request.CallSid)));
+
 
                 // This is phone of the person that calls the twilo number
                 string phoneFrom = from;
@@ -443,7 +463,7 @@ namespace TwilioConference.Controllers
                                               ref string strHourMessage)
         {
             var retVal = false;
-
+            // To resume from here tomorrow
             var blnCallStartTimeAtTimeSlot =
                 ((zdtCallStartMinute % 10) == 0)          // The start minute is either exactly at  00 / 10 / 20 / 30 / 40 / 50 past the hour
                 ||                                        // OR
