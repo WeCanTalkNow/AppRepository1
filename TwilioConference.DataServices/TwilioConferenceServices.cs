@@ -24,23 +24,39 @@ namespace TwilioConference.DataServices
             }
         }
 
-        public TwilioConferenceCall CreateTwilioConferenceRecord(string phone1, string phone2)
+        public void ErrorMessage(string message, int id = 0)
         {
             using (var _dbContext = new TwilloDbContext())
             {
-                TwilioConferenceCall callRecord = new TwilioConferenceCall();
-                callRecord.Phone1 = phone1;
-                callRecord.Phone2 = phone2;
-                callRecord.SystemStatus = SystemStatus.ACTIVE;
-                callRecord.CallIsActive = true;
-
-
-                _dbContext.TwilioConferenceCalls.Add(callRecord);
+                _dbContext.LogMessages.Add(new LogMessage()
+                {
+                    LogTime = DateTime.Now,
+                    ConferenceRecordId = id,
+                    Message = message
+                });
                 _dbContext.SaveChanges();
-
-                return callRecord;
             }
         }
+
+
+
+        //public TwilioConferenceCall CreateTwilioConferenceRecord(string phone1, string phone2)
+        //{
+        //    using (var _dbContext = new TwilloDbContext())
+        //    {
+        //        TwilioConferenceCall callRecord = new TwilioConferenceCall();
+        //        callRecord.Phone1 = phone1;
+        //        callRecord.Phone2 = phone2;
+        //        callRecord.SystemStatus = SystemStatus.ACTIVE;
+        //        callRecord.CallIsActive = true;
+
+
+        //        _dbContext.TwilioConferenceCalls.Add(callRecord);
+        //        _dbContext.SaveChanges();
+
+        //        return callRecord;
+        //    }
+        //}
 
         public void UpdateConferenceSid(TwilioConferenceCall conference)
         {
@@ -64,27 +80,75 @@ namespace TwilioConference.DataServices
             }
         }
 
-        public TwilioConferenceCall CreateTwilioConferenceRecord(string phone1, string phone2, string conferenceName, string phoneCall1Sid)
+        public TwilioConferenceCall CreateTwilioConferenceRecord(string phoneFrom, string phoneTo, string twilioPhoneNumber, string conferenceName, string phoneCall1Sid)
         {
             using (var _dbContext = new TwilloDbContext())
             {
                 TwilioConferenceCall callRecord = new TwilioConferenceCall();
-                callRecord.Phone1 = phone1;
-                callRecord.Phone2 = phone2;
+                callRecord.PhoneFrom = phoneFrom;
+                callRecord.PhoneTo = phoneTo;
+                callRecord.TwilioPhoneNumber = twilioPhoneNumber;
                 callRecord.ConferenceName = conferenceName;
                 callRecord.PhoneCall1SID = phoneCall1Sid;
                 callRecord.SystemStatus = SystemStatus.ACTIVE;
                 callRecord.CallIsActive = true;
-
-
                 _dbContext.TwilioConferenceCalls.Add(callRecord);
                 _dbContext.SaveChanges();
-
                 return callRecord;
             }
         }
 
-        public string GetMostRecentConferenceNameFromNumber(string from = null)
+        public string GetRandomConferenceName()
+        {
+            Random rnd = new Random();
+
+            string[] greekAlpha = new string[] { "apple"
+                , "alpha"
+                , "beta"
+                , "gamma"
+                , "delta"
+                , "omega"
+                , "sigma" };
+            return greekAlpha[rnd.Next(0, greekAlpha.Length)] + DateTime.Now.Ticks;
+        }
+
+
+
+        public string GetMostRecentConferenceNameFromNumber(string twilioPhonenumber)
+        {
+
+            string conferenceName = "mango";
+
+            try
+            {
+                using (var _dbContext = new TwilloDbContext())
+                {
+                    // Note: This has to return a value
+                    // This is the most recent conference started via a 
+                    // specific Twilio number and which is Active
+                    // Only worry right now is to ensure that 
+                    // periodic maintenace of the conference calls takes place every now and then
+                    // ensuring that not too many records in the conference table.
+                    TwilioConferenceCall found = _dbContext.TwilioConferenceCalls
+                      .Where(c => c.CallIsActive
+                      && c.TwilioPhoneNumber == string.Format("+{0}", twilioPhonenumber))
+                      .OrderByDescending(c => c.CallStartTime).SingleOrDefault();
+
+                    conferenceName = found.ConferenceName;
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
+                    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+            }
+            return conferenceName;
+        }
+
+
+        public string GetMostRecentConferenceNameFromNumber()
         {
             //Note an intelligent method is 
             //needed to connect the conferencename to number 2 and 1
@@ -98,7 +162,8 @@ namespace TwilioConference.DataServices
 
                 if(found != null)
                 {
-                    conferenceName = found.ConferenceName;
+                    conferenceName = found.ConferenceName;   
+                    
                 }
             }
 
@@ -164,9 +229,10 @@ namespace TwilioConference.DataServices
         }
 
 
-        public bool CheckAvailabilityAndFetchDetails(ref string struserName,
-            ref string Service_User_Conference_With_Number, ref string strTimeZoneID, 
-                 string Service_User_Twilio_Phone_Number)
+        public bool CheckAvailabilityAndFetchDetails(string Service_User_Twilio_Phone_Number,
+                                    ref string struserName,
+                                        ref string Service_User_Conference_With_Number, 
+                                            ref string strTimeZoneID)                 
         {
             var retVal = true;
 

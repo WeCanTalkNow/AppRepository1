@@ -15,14 +15,17 @@ namespace TwilioConference.Timer
         static void Main(string[] args)
         {
             TwilioConferenceServices conferenceServices = new TwilioConferenceServices();
-
+            try
+            {
             //Pass in the ConferenceRecordId
             int id = int.Parse(args[0]);
-            conferenceServices.LogMessage("Entered TwilioConference.Timer at " + DateTime.Now.ToString(), id);
+            string SERVICE_USER_TWILIO_PHONE_NUMBER = args[1];
+
+            conferenceServices.LogMessage("Entered Scheduled Timer at " + DateTime.Now.ToString(), id);
             string TWILIO_ACCOUNT_SID = ConfigurationManager.AppSettings["TWILIO_ACCOUNT_SID"];
             string TWILIO_ACCOUNT_TOKEN = ConfigurationManager.AppSettings["TWILIO_ACCOUNT_TOKEN"];
 
-            string SERVICE_USER_TWILIO_PHONE_NUMBER = ConfigurationManager.AppSettings["SERVICE_USER_TWILIO_PHONE_NUMBER"];
+            //string SERVICE_USER_TWILIO_PHONE_NUMBER = ConfigurationManager.AppSettings["SERVICE_USER_TWILIO_PHONE_NUMBER"];
             string TWILIO_BOT_NUMBER = ConfigurationManager.AppSettings["TWILIO_BOT_NUMBER"];
 
             //string callSid = "CAbe07f2cc9faea5a9a7e832db7e4fa239";
@@ -36,10 +39,8 @@ namespace TwilioConference.Timer
             DateTimeOffset hangUpOffset = DateTime.Now.AddMinutes(1);
             conferenceServices.LogMessage(string.Format("10 minute timer will execute at :{0}", hangUpOffset), id);
 
-            try
-            {
-                // construct a scheduler factory
-                ISchedulerFactory schedFact = new StdSchedulerFactory();
+            // construct a scheduler factory
+            ISchedulerFactory schedFact = new StdSchedulerFactory();
 
                 // get a scheduler
                 IScheduler sched = schedFact.GetScheduler();
@@ -55,20 +56,9 @@ namespace TwilioConference.Timer
                     .UsingJobData("twilloAccountToken", TWILIO_ACCOUNT_TOKEN)
                     .UsingJobData("id", id)
                     .UsingJobData("conferenceName", conferenceName)
-                    .UsingJobData("serviceUserTwilioPhoneNumber", SERVICE_USER_TWILIO_PHONE_NUMBER)
+                    .UsingJobData("serviceUserTwilioPhoneNumber",  SERVICE_USER_TWILIO_PHONE_NUMBER.Substring(2))
                     .UsingJobData("twilioBotNumber", TWILIO_BOT_NUMBER)
                     .Build();
-
-                //IJobDetail messageNotificationJobDetail =
-                //    JobBuilder.Create<MessageJob>()
-                //    .WithIdentity("MessageJob", "TwilioGroup")
-                //    .UsingJobData("callSid", conferenceSid)
-                //    .UsingJobData("twilloAccountSid", TWILIO_ACCOUNT_SID)
-                //    .UsingJobData("twilloAccountToken", TWILIO_ACCOUNT_TOKEN)
-                //    .UsingJobData("id", id)
-                //    .UsingJobData("conferenceName", conferenceName)
-                //    .Build();
-
 
                 ITrigger messageTrigger = TriggerBuilder.Create()
                     .StartAt(messageOffset)
@@ -91,10 +81,20 @@ namespace TwilioConference.Timer
 
                 sched.ScheduleJob(hangUpJobDetail, hangUpTrigger);
 
+                conferenceServices.LogMessage(string.Format("Successfuly completed Scheduled Timer - "
+                    + " Twilio Phone Number-{0} Bot Number-{1} Conference Name-{2} Conference SID-{3} ID-{4} ", 
+                    SERVICE_USER_TWILIO_PHONE_NUMBER, 
+                      TWILIO_BOT_NUMBER, 
+                        conferenceName, 
+                          conferenceSid, 
+                            id),id);
             }
-            catch (ArgumentException e)
+            catch (ArgumentException ex)
             {
-                Console.WriteLine(e);
+
+                conferenceServices.ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
+ ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+
             }
         }
     }

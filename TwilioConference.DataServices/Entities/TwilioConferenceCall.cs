@@ -12,9 +12,10 @@ namespace TwilioConference.DataServices.Entities
         public string ConferenceSID { get; set; }
         public string PhoneCall1SID { get; set; }
         public DateTime? CallStartTime { get; set; }
-        public bool? CallIsActive { get; set; }
-        public string Phone1 { get; set; }
-        public string Phone2 { get; set; }
+        public bool CallIsActive { get; set; }
+        public string PhoneFrom { get; set; }
+        public string PhoneTo { get; set; }
+        public string TwilioPhoneNumber { get; set; }
         public SystemStatus SystemStatus {get;set;}
         public string ConferenceName { get; set; }
     }
