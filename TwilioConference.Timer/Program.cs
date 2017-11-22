@@ -16,8 +16,8 @@ namespace TwilioConference.Timer
             //Pass in the ConferenceRecordId
             int id = int.Parse(args[0]);
             string SERVICE_USER_TWILIO_PHONE_NUMBER = args[1];
-            var messageInterval = long.Parse(args[2]);
-            var hangupInterval = long.Parse(args[3]);
+            var messageInterval = double.Parse(args[2]);
+            var hangupInterval = double.Parse(args[3]);
 
             conferenceServices.LogMessage("Entered Scheduled Timer at " + DateTime.Now.ToString(), id);
             string TWILIO_ACCOUNT_SID = ConfigurationManager.AppSettings["TWILIO_ACCOUNT_SID"];
@@ -32,11 +32,12 @@ namespace TwilioConference.Timer
 
             //Message offset depending on ticks elapsed since call
             //DateTimeOffset messageOffset = DateTime.Now.AddMinutes(.5);
-            DateTimeOffset messageOffset = DateTime.Now.AddTicks(messageInterval);
+            DateTimeOffset messageOffset = DateTime.Now.AddSeconds(messageInterval);
             conferenceServices.LogMessage(string.Format("Message timer will execute at :{0}",messageOffset), id);
+
             //Hangup offset depending on ticks elapsed since call
             //DateTimeOffset hangUpOffset = DateTime.Now.AddMinutes(1);
-            DateTimeOffset hangUpOffset = DateTime.Now.AddTicks(hangupInterval);
+            DateTimeOffset hangUpOffset = DateTime.Now.AddSeconds(hangupInterval);
             conferenceServices.LogMessage(string.Format("Hangup timer will execute at :{0}", hangUpOffset), id);
 
             // construct a scheduler factory
@@ -82,12 +83,21 @@ namespace TwilioConference.Timer
                 sched.ScheduleJob(hangUpJobDetail, hangUpTrigger);
 
                 conferenceServices.LogMessage(string.Format("Successfuly completed Scheduled Timer - "
-                    + " Twilio Phone Number-{0} Bot Number-{1} Conference Name-{2} Conference SID-{3} ID-{4} ", 
+                    + " Twilio Phone Number-{0} " 
+                      +  "Bot Number-{1} " 
+                        +  "Conference Name-{2} "
+                          + "Conference SID-{3} "
+                              + "ID-{4} "
+                                + "Number of seconds to message-{5}"
+                                    + "Number of seconds to hangup-{6}",
                     SERVICE_USER_TWILIO_PHONE_NUMBER, 
                       TWILIO_BOT_NUMBER, 
                         conferenceName, 
                           conferenceSid, 
-                            id),id);
+                            id,
+                             messageInterval,
+                              hangupInterval
+                                ),id);
             }
             catch (ArgumentException ex)
             {

@@ -48,8 +48,8 @@ namespace TwilioConference.Controllers
         private string strCallServiceUserName = "";
         private CallResource _crCurrentCall;        
         private string _strCallSID;
-        private Int64 messageInterval;
-        private Int64 hangupInterval;
+        private double messageIntervalinSeconds;
+        private double hangupIntervalinSeconds;
 
         private TwilioConferenceServices conferenceServices = new TwilioConferenceServices();
 
@@ -173,22 +173,22 @@ namespace TwilioConference.Controllers
                 int intSecondsToPause = 0;
                 var strHourMessage = string.Empty;
 
-                Boolean callStartTimeMeetsRequirements = 
-                    CallStartTimeMeetsRequirements(
+                Boolean callStartAtTimeSlot = 
+                    CallStartAtTimeSlot(
                         targetCallStartTime.LocalDateTime.Minute,
                             targetCallStartTime.LocalDateTime.Second,
                                 ref intMinutesToPause,
                                     ref intSecondsToPause,
-                                        ref strHourMessage);
+                                        ref strHourMessage,
+                                          ref messageIntervalinSeconds,
+                                            ref hangupIntervalinSeconds);
 
-                     
 
-                    if (!callStartTimeMeetsRequirements)
+                response.Say("You've reached the Tackle Time line of ");
+                response.Say(strCallServiceUserName);
+
+                if (!callStartAtTimeSlot)
                     {
-                    messageInterval = ((intMinutesToPause * 60) + intSecondsToPause) + (8 * 60);
-                    hangupInterval = ((intMinutesToPause * 60) + intSecondsToPause) + (9 * 60);
-                    response.Say("You've reached the Tackle Time line of ");
-                    response.Say(strCallServiceUserName);
                     response.Say("You will be connected in");
                     response.Say(intMinutesToPause.ToString());
                     response.Say("minutes and");
@@ -201,17 +201,24 @@ namespace TwilioConference.Controllers
                     // response.Pause((intMinutesToPause * 60) + intSecondsToPause);                   
                    }
 
-                // Resume from here
+
                 conferenceServices.LogMessage(string.Concat("checking call time values ",
                                     string.Format("targetCallStartTime {0} " +
                                       "targetCallStartTime.LocalDateTime.Minute {1} " +
-                                         "targetCallStartTime.LocalDateTime.Second {2} utcCallStartTime {3} tzTargetDateTime {4} Call SID {5}"
-                                      , phoneFrom
-                                        , phoneTo
-                                           , SERVICE_USER_CONFERENCE_WITH_NUMBER
-                                              , callStartTimeMeetsRequirements
-                                                , conferenceName
-                                                   , request.CallSid)));
+                                         "targetCallStartTime.LocalDateTime.Second {2} " +
+                                            "utcCallStartTime {3} " +
+                                               "tzTargetDateTime {4} " +
+                                                   "Call SID {5}" +
+                                                      "Minutes to pause {6}" +
+                                                         "Seconds to pause {7}"
+                                      , targetCallStartTime
+                                        , targetCallStartTime.LocalDateTime.Minute
+                                           , targetCallStartTime.LocalDateTime.Second
+                                              , utcCallStartTime
+                                                , tzTargetDateTime
+                                                   , request.CallSid
+                                                      , intMinutesToPause
+                                                        , intSecondsToPause)));
 
 
                 // This is phone of the person that calls the twilo number
@@ -226,7 +233,7 @@ namespace TwilioConference.Controllers
                       , phoneFrom
                         , phoneTo
                            , SERVICE_USER_CONFERENCE_WITH_NUMBER
-                              , callStartTimeMeetsRequirements
+                              , callStartAtTimeSlot
                                 , conferenceName
                                    , request.CallSid)));
 
@@ -295,7 +302,7 @@ namespace TwilioConference.Controllers
                                            , conferenceRecord.TwilioPhoneNumber
                                                    , request.CallSid)),id);
 
-                                string[] args = { conferenceRecordId.ToString(), conferenceRecord.TwilioPhoneNumber };
+                                string[] args = { conferenceRecordId.ToString(), conferenceRecord.TwilioPhoneNumber, messageIntervalinSeconds.ToString(),hangupIntervalinSeconds.ToString() };
                                 ProcessStartInfo processStartInfo = new ProcessStartInfo();
                                 processStartInfo.FileName = TIMER_EXE;
                                 processStartInfo.Arguments = string.Join(" ", args);
@@ -455,67 +462,85 @@ namespace TwilioConference.Controllers
             return new TwiMLResult(response);
         }
 
-        private bool CallStartTimeMeetsRequirements
+        private bool CallStartAtTimeSlot
                               (int zdtCallStartMinute,
                                    int zdtCallStartSecond,
                                         ref int intMinutesToPause,
                                             ref int intSecondsToPause,
-                                              ref string strHourMessage)
+                                              ref string strHourMessage,
+                                                ref double messageIntervalinSeconds,
+                                                    ref double hangupIntervalinSeconds)
         {
+            // To resume from here tomorrow (rationalize this routine)
+
+            // Assume Call start time is 19:47:34
+            // zdtCall Start start minute is 47
+            // zdtCall Start start second is 34
             var retVal = false;
-            // To resume from here tomorrow
+            
             var blnCallStartTimeAtTimeSlot =
                 ((zdtCallStartMinute % 10) == 0)          // The start minute is either exactly at  00 / 10 / 20 / 30 / 40 / 50 past the hour
                 ||                                        // OR
                 ((zdtCallStartMinute - 1) % 10) == 0;     // The start minute is within a minute of 00 / 10 / 20 / 30 / 40 / 50 past the hour
 
-            switch (blnCallStartTimeAtTimeSlot)
+            retVal = blnCallStartTimeAtTimeSlot;
+
+            // Keep both message & hangup interval at default values of 8 & 9 minutes
+            messageIntervalinSeconds = (8 * 60);
+            hangupIntervalinSeconds = (9 * 60);
+
+            // Find total absolute seconds of call start time     
+            // If call start minute is 47 and call start seconds is 34
+            // intCallStartTotalSeconds = 2854
+            var intCallStartTotalSeconds =
+                zdtCallStartSecond             //Second the call started
+                  + (zdtCallStartMinute * 60); //Minute the call started
+
+            // Fid time slot end
+            // IF call start minute is 47 then div = 4
+            var div = zdtCallStartMinute / 10;
+            // time slot end is 50 
+            var timeslotend = (10 * div) + 10;
+            switch (timeslotend)
             {
-                case true:
-                    retVal = true;
+                case 60:
+                    strHourMessage = "at the Top of the hour";
                     break;
-
-                case false:
-                    // Find total absolute seconds of call start time     
-                    var intCallStartTotalSeconds =
-                        zdtCallStartSecond             //Second the call started
-                          + (zdtCallStartMinute * 60); //Minute the call started
-
-                    // Fid time slot end
-                    var div = zdtCallStartMinute / 10;
-                    var timeslotend = (10 * div) + 10;
-
-                    switch (timeslotend)
-                    {
-                        case 60:
-                            strHourMessage = "at the Top of the hour";
-                            break;
-                        case 10:
-                            strHourMessage = "at ten minutes past the hour";
-                            break;
-                        case 20:
-                            strHourMessage = "at twenty minutes past the hour";
-                            break;
-                        case 30:
-                            strHourMessage = "at thirty minutes past the hour";
-                            break;
-                        case 40:
-                            strHourMessage = "at fourty minutes past the hour";
-                            break;
-                        case 50:
-                            strHourMessage = "at fifty minutes past the hour";
-                            break;
-                    }
-
-
-                    // Find total absolute seconds of call slot end time
-                    var intCallSlotEndTotalSeconds = timeslotend * 60;
-
-                    // Cover to minutes & seconds
-                    intMinutesToPause = (intCallSlotEndTotalSeconds - intCallStartTotalSeconds) / 60;
-                    intSecondsToPause = (intCallSlotEndTotalSeconds - intCallStartTotalSeconds) % 60;
+                case 10:
+                    strHourMessage = "at ten minutes past the hour";
+                    break;
+                case 20:
+                    strHourMessage = "at twenty minutes past the hour";
+                    break;
+                case 30:
+                    strHourMessage = "at thirty minutes past the hour";
+                    break;
+                case 40:
+                    strHourMessage = "at fourty minutes past the hour";
+                    break;
+                case 50:
+                    strHourMessage = "at fifty minutes past the hour";
                     break;
             }
+
+            // Find total absolute seconds of call slot end time
+            // In current case this value is 3000 (60 * 50)
+            var intCallSlotEndTotalSeconds = timeslotend * 60;
+
+            // Convert to minutes & seconds
+            // intMinutesToPause = (3000 - 2854) / 60 = 2 minutes
+            intMinutesToPause = (intCallSlotEndTotalSeconds - intCallStartTotalSeconds) / 60;
+            // intSecondsToPause = (3000 - 2854) % 60 = 26 seconds
+            intSecondsToPause = (intCallSlotEndTotalSeconds - intCallStartTotalSeconds) % 60;
+
+            if ((blnCallStartTimeAtTimeSlot) && (intSecondsToPause > 0))
+            {
+                // Total 8 minutes into message, convert to seconds and adjust for 26 seconds into call
+                messageIntervalinSeconds = (8 * 60) - (60 - intSecondsToPause);
+                // Total 9 minutes into message, convert to seconds and adjust for 26 seconds into call
+                hangupIntervalinSeconds = (9 * 60) - (60 - intSecondsToPause);
+            }
+
             return retVal;
         }
 

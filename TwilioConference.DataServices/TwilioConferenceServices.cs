@@ -232,7 +232,7 @@ namespace TwilioConference.DataServices
         public bool CheckAvailabilityAndFetchDetails(string Service_User_Twilio_Phone_Number,
                                     ref string struserName,
                                         ref string Service_User_Conference_With_Number, 
-                                            ref string strTimeZoneID)                 
+                                            ref string strTimeZoneID)
         {
             var retVal = true;
 
