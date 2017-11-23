@@ -83,13 +83,13 @@ namespace TwilioConference.Timer
                 sched.ScheduleJob(hangUpJobDetail, hangUpTrigger);
 
                 conferenceServices.LogMessage(string.Format("Successfuly completed Scheduled Timer - "
-                    + " Twilio Phone Number-{0} " 
-                      +  "Bot Number-{1} " 
-                        +  "Conference Name-{2} "
-                          + "Conference SID-{3} "
-                              + "ID-{4} "
-                                + "Number of seconds to message-{5}"
-                                    + "Number of seconds to hangup-{6}",
+                    + " |Twilio Phone Number-{0}| " 
+                      +  "|Bot Number-{1}| " 
+                        +  "|Conference Name-{2}| "
+                          + "|Conference SID-{3} |"
+                              + "|ID-{4} |"
+                                + " |Number of seconds to message-{5}|"
+                                    + "|Number of seconds to hangup-{6}|",
                     SERVICE_USER_TWILIO_PHONE_NUMBER, 
                       TWILIO_BOT_NUMBER, 
                         conferenceName, 

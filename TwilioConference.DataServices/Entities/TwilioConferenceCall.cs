@@ -18,5 +18,7 @@ namespace TwilioConference.DataServices.Entities
         public string TwilioPhoneNumber { get; set; }
         public SystemStatus SystemStatus {get;set;}
         public string ConferenceName { get; set; }
+        public double messageIntervalInSeconds { get; set; }
+        public double hangupIntervalInSeconds { get; set; }
     }
 }

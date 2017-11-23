@@ -40,7 +40,7 @@ namespace TwilioConference.Timer
                , TWILIO_BOT_NUMBER);
             conferenceServices.LogMessage(dataMapValues, id);
 
-            string connectUrl = "http://callingserviceconferenceapp.azurewebsites.net/twilioconference/ConnectTwilioBot";
+            string connectUrl = "http://callingserviceconference.azurewebsites.net/twilioconference/ConnectTwilioBot";
             try
             {
 

@@ -303,3 +303,6 @@ __pycache__/
 
 # OpenCover UI analysis results
 OpenCover/
+/concallsWithsampledata.sql
+/LogfileWithsampledata.sql
+/users.sql

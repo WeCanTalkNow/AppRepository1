@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TwilioConference.DataServices.Entities;
 
 namespace TwilioConference.DataServices
@@ -80,20 +77,32 @@ namespace TwilioConference.DataServices
             }
         }
 
-        public TwilioConferenceCall CreateTwilioConferenceRecord(string phoneFrom, string phoneTo, string twilioPhoneNumber, string conferenceName, string phoneCall1Sid)
+        public TwilioConferenceCall CreateTwilioConferenceRecord(string phoneFrom, string phoneTo, string twilioPhoneNumber, string conferenceName, string phoneCall1Sid, double hangupIntervalinSeconds, double messageIntervalinSeconds)
         {
             using (var _dbContext = new TwilloDbContext())
             {
                 TwilioConferenceCall callRecord = new TwilioConferenceCall();
-                callRecord.PhoneFrom = phoneFrom;
-                callRecord.PhoneTo = phoneTo;
-                callRecord.TwilioPhoneNumber = twilioPhoneNumber;
-                callRecord.ConferenceName = conferenceName;
-                callRecord.PhoneCall1SID = phoneCall1Sid;
-                callRecord.SystemStatus = SystemStatus.ACTIVE;
-                callRecord.CallIsActive = true;
-                _dbContext.TwilioConferenceCalls.Add(callRecord);
-                _dbContext.SaveChanges();
+                try
+                {
+                    callRecord.PhoneFrom = phoneFrom;
+                    callRecord.PhoneTo = phoneTo;
+                    callRecord.TwilioPhoneNumber = twilioPhoneNumber;
+                    callRecord.ConferenceName = conferenceName;
+                    callRecord.PhoneCall1SID = phoneCall1Sid;
+                    callRecord.SystemStatus = SystemStatus.ACTIVE;
+                    callRecord.CallIsActive = true;
+                    callRecord.hangupIntervalInSeconds = hangupIntervalinSeconds;
+                    callRecord.messageIntervalInSeconds = messageIntervalinSeconds;
+                    _dbContext.TwilioConferenceCalls.Add(callRecord);
+                    _dbContext.SaveChanges();
+
+                }
+                catch (Exception ex)
+                {
+                    ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
+                        ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+                    throw;
+                }
                 return callRecord;
             }
         }
@@ -206,11 +215,20 @@ namespace TwilioConference.DataServices
 
         public void UpdateActiveStatus(int id, bool v)
         {
-            using (var _dbContext = new TwilloDbContext())
+            try
             {
-                var found = _dbContext.TwilioConferenceCalls.Find(id);
-                found.CallIsActive = v;
-                _dbContext.SaveChanges();
+                using (var _dbContext = new TwilloDbContext())
+                {
+                    var found = _dbContext.TwilioConferenceCalls.Find(id);
+                    found.CallIsActive = v;
+                    _dbContext.SaveChanges();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
+                    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
             }
         }
 
@@ -255,7 +273,8 @@ namespace TwilioConference.DataServices
             }
             catch (Exception ex)
             {
-
+                ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
+                    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
             }
             return retVal;
         }
@@ -264,14 +283,24 @@ namespace TwilioConference.DataServices
         {
             var retVal = String.Empty;
 
-            using (var context = new TwilloDbContext())
+            try
             {
-                var user =
-                            context
-                            .User
-                                .Where(u => u.Service_User_Twilio_Phone_Number == twilioPhoneNumber.ToString().Substring(2)).FirstOrDefault();
+                using (var context = new TwilloDbContext())
+                {
+                    var user =
+                                context
+                                .User
+                                    .Where(u => u.Service_User_Twilio_Phone_Number == twilioPhoneNumber.ToString().Substring(2)).FirstOrDefault();
 
-                retVal = Convert.ToBoolean(user.AvailableStatus) ? "Available" : "Not Available";
+                    retVal = Convert.ToBoolean(user.AvailableStatus) ? "Available" : "Not Available";
+                }
+
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
+                    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+                throw;
             }
             return retVal;
         }
@@ -279,46 +308,56 @@ namespace TwilioConference.DataServices
         public  string updateStatus(Int16 requiredStatus, string twilioPhoneNumber)
         {
             var retVal = string.Empty;
-           
-            using (var context = new TwilloDbContext())
-            {
-                var user =
-                            context
-                            .User
-                                .Where(u => u.Service_User_Twilio_Phone_Number == twilioPhoneNumber.ToString().Substring(2)).FirstOrDefault();
 
-                switch (Convert.ToBoolean(requiredStatus))
+            try
+            {
+                using (var context = new TwilloDbContext())
                 {
-                    case true:
-                        {
-                            if ((user.AvailableStatus) == true)
-                                retVal = "Status is already Available";
-                            // Do nothing
-                            else
+                    var user =
+                                context
+                                .User
+                                    .Where(u => u.Service_User_Twilio_Phone_Number == twilioPhoneNumber.ToString().Substring(2)).FirstOrDefault();
+
+                    switch (Convert.ToBoolean(requiredStatus))
+                    {
+                        case true:
                             {
-                                user.AvailableStatus = true;
-                                context.SaveChanges();
-                                retVal = "Status is now set to Available";
+                                if ((user.AvailableStatus) == true)
+                                    retVal = "Status is already Available";
+                                // Do nothing
+                                else
+                                {
+                                    user.AvailableStatus = true;
+                                    context.SaveChanges();
+                                    retVal = "Status is now set to Available";
+                                }
                             }
-                        }
-                        break;
-                    case false:
-                        {
-                            if ((user.AvailableStatus) == false)
-                                retVal = "Status is already Not Available";
-                            // Do nothing
-                            else
+                            break;
+                        case false:
                             {
-                                user.AvailableStatus = false;
-                                context.SaveChanges();
-                                retVal = "Status is now set to Not Available";
+                                if ((user.AvailableStatus) == false)
+                                    retVal = "Status is already Not Available";
+                                // Do nothing
+                                else
+                                {
+                                    user.AvailableStatus = false;
+                                    context.SaveChanges();
+                                    retVal = "Status is now set to Not Available";
+                                }
                             }
-                        }
-                        break;
-                    default:
-                        break;
+                            break;
+                        default:
+                            break;
+                    }
+
                 }
 
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
+                    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+                throw;
             }
             return retVal;
         }
