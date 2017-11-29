@@ -18,25 +18,26 @@ namespace TwilioConference.Timer
             string SERVICE_USER_TWILIO_PHONE_NUMBER = args[1];
             var messageInterval = double.Parse(args[2]);
             var hangupInterval = double.Parse(args[3]);
+            var warningInterval = double.Parse(args[4]);
 
             conferenceServices.LogMessage("Entered Scheduled Timer at " + DateTime.Now.ToString(), id);
             string TWILIO_ACCOUNT_SID = ConfigurationManager.AppSettings["TWILIO_ACCOUNT_SID"];
             string TWILIO_ACCOUNT_TOKEN = ConfigurationManager.AppSettings["TWILIO_ACCOUNT_TOKEN"];
 
-            //string SERVICE_USER_TWILIO_PHONE_NUMBER = ConfigurationManager.AppSettings["SERVICE_USER_TWILIO_PHONE_NUMBER"];
             string TWILIO_BOT_NUMBER = ConfigurationManager.AppSettings["TWILIO_BOT_NUMBER"];
 
-            //string callSid = "CAbe07f2cc9faea5a9a7e832db7e4fa239";
             string conferenceSid = conferenceServices.GetConferenceRecord(id).ConferenceSID;
             conferenceServices.LogMessage("Conference id is: "+conferenceSid + " TwilioConference.Timer", id);
 
             //Message offset depending on ticks elapsed since call
-            //DateTimeOffset messageOffset = DateTime.Now.AddMinutes(.5);
             DateTimeOffset messageOffset = DateTime.Now.AddSeconds(messageInterval);
             conferenceServices.LogMessage(string.Format("Message timer will execute at :{0}",messageOffset), id);
 
+            //Warning offset depending on ticks elapsed since call
+            DateTimeOffset warningOffset = DateTime.Now.AddSeconds(warningInterval);
+            conferenceServices.LogMessage(string.Format("Warning timer will execute at :{0}", warningOffset), id);
+
             //Hangup offset depending on ticks elapsed since call
-            //DateTimeOffset hangUpOffset = DateTime.Now.AddMinutes(1);
             DateTimeOffset hangUpOffset = DateTime.Now.AddSeconds(hangupInterval);
             conferenceServices.LogMessage(string.Format("Hangup timer will execute at :{0}", hangUpOffset), id);
 
@@ -49,6 +50,7 @@ namespace TwilioConference.Timer
 
                 var conferenceName = new TwilioConferenceServices().GetConferenceRecord(id).ConferenceName;
 
+// Create Job 1
                 IJobDetail messageNotificationJobDetail =
                     JobBuilder.Create<MessageJob>()
                     .WithIdentity("MessageJob", "TwilioGroup")
@@ -67,6 +69,26 @@ namespace TwilioConference.Timer
 
                 sched.ScheduleJob(messageNotificationJobDetail, messageTrigger);
 
+// Create Job 2
+                IJobDetail warningNotificationJobDetail =
+                    JobBuilder.Create<CallEndWarningJob>()
+                    .WithIdentity("CallEndWarningJob", "TwilioGroup")
+                    .UsingJobData("callSid", conferenceSid)
+                    .UsingJobData("twilloAccountSid", TWILIO_ACCOUNT_SID)
+                    .UsingJobData("twilloAccountToken", TWILIO_ACCOUNT_TOKEN)
+                    .UsingJobData("id", id)
+                    .UsingJobData("conferenceName", conferenceName)
+                    .UsingJobData("serviceUserTwilioPhoneNumber", SERVICE_USER_TWILIO_PHONE_NUMBER.Substring(2))
+                    .UsingJobData("twilioBotNumber", TWILIO_BOT_NUMBER)
+                    .Build();
+
+                ITrigger warningTrigger = TriggerBuilder.Create()
+                    .StartAt(warningOffset)
+                    .Build();
+
+                sched.ScheduleJob(warningNotificationJobDetail, warningTrigger);
+
+// Create Job 3
                 IJobDetail hangUpJobDetail = JobBuilder.Create<HangUpJob>()
                  .WithIdentity("HangUpJob", "TwilioGroup")
                  .UsingJobData("twilloAccountSid", TWILIO_ACCOUNT_SID)
@@ -89,15 +111,17 @@ namespace TwilioConference.Timer
                           + "|Conference SID-{3} |"
                               + "|ID-{4} |"
                                 + " |Number of seconds to message-{5}|"
-                                    + "|Number of seconds to hangup-{6}|",
+                                    + "|Number of seconds to warning-{6}|"
+                                    +"|Number of seconds to hangup-{7}|",
                     SERVICE_USER_TWILIO_PHONE_NUMBER, 
                       TWILIO_BOT_NUMBER, 
                         conferenceName, 
                           conferenceSid, 
                             id,
                              messageInterval,
-                              hangupInterval
-                                ),id);
+                               warningInterval,
+                                 hangupInterval)
+                                 ,id);
             }
             catch (ArgumentException ex)
             {

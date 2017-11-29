@@ -119,6 +119,7 @@
   <ItemGroup>
     <Compile Include="Constants.cs" />
     <Compile Include="HangUpJob.cs" />
+    <Compile Include="CallEndWarningJob.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MessageJob.cs" />

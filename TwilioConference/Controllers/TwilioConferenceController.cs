@@ -50,6 +50,7 @@ namespace TwilioConference.Controllers
         private string _strCallSID;
         double messageIntervalinSeconds;
         double hangupIntervalinSeconds;
+        double warningIntervalinSeconds;
 
         private TwilioConferenceServices conferenceServices = new TwilioConferenceServices();
 
@@ -57,7 +58,7 @@ namespace TwilioConference.Controllers
         {
             //TwilioClient.Init(TWILIO_ACCOUNT_SID, TWILIO_ACCOUNT_TOKEN);
             //conferenceServices = new TwilioConferenceServices();
-            conferenceServices.LogMessage("In contructor");
+            //conferenceServices.LogMessage("In contructor");
         }
 
         //    // Step 1  Determine if User is available
@@ -113,7 +114,6 @@ namespace TwilioConference.Controllers
                                , SERVICE_USER_CONFERENCE_WITH_NUMBER
                                   , strTargetTimeZoneID
                                     , IsUserAvailableToTakeCalls)));
-
                 }
                 catch (Exception ex)
                 {
@@ -127,27 +127,27 @@ namespace TwilioConference.Controllers
             
             if (from.Contains(TWILIO_BOT_NUMBER))
             {
-                conferenceServices.LogMessage("Connected from TWILIO NUMBER controller");
                 string conferenceName = "mango";
-
+                var conferenceid = 0;
                 try
-                {
-                   conferenceName = conferenceServices.GetMostRecentConferenceNameFromNumber();
+                {                   
+                   conferenceName = conferenceServices.GetMostRecentConferenceNameFromNumber(ref conferenceid);
+                    conferenceServices.LogMessage(string.Concat("Step 5 Connecting Bot to conference ",
+                        string.Format("|Twilio Bot Number {0}| Conference Name {1}|"
+                          , TWILIO_BOT_NUMBER
+                            , conferenceName)), conferenceid);
+
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     conferenceServices.LogMessage(ex.Message);
                 }
 
-                conferenceServices.LogMessage(string.Concat("Step 5 Connecting Bot to conference ",
-                    string.Format("|Twilio Bot Number {0}| Conference Name {1}|"
-                      , TWILIO_BOT_NUMBER
-                        , conferenceName)));
 
                 var dial = new Dial();
-                dial.Conference(conferenceName);
+                dial.Conference(conferenceName);                
                 response.Dial(dial);
-
+                
                 return new TwiMLResult(response);
             }
             else
@@ -181,7 +181,8 @@ namespace TwilioConference.Controllers
                                     ref intSecondsToPause,
                                         ref strHourMessage,
                                           ref messageIntervalinSeconds,
-                                            ref hangupIntervalinSeconds);
+                                            ref hangupIntervalinSeconds,
+                                            ref warningIntervalinSeconds);
 
 
                 response.Say("You've reached the Tackle Time line of ");
@@ -197,10 +198,31 @@ namespace TwilioConference.Controllers
                     response.Say(strHourMessage);
                     response.Pause(1);
                     response.Say("Please hold ");
-                    // Pause a number of seconds
-                    // response.Pause((intMinutesToPause * 60) + intSecondsToPause);                   
-                   }
+                    //Pause a number of seconds
+                    //response.Pause((intMinutesToPause * 60) + intSecondsToPause);
+                }
 
+
+                // This is phone of the person that calls the twilo number
+                string phoneFrom = from;
+                // Number on which  Service User prefers to take calls - Get from DB     
+                string phoneTo = string.Format("+{0}",SERVICE_USER_CONFERENCE_WITH_NUMBER); 
+                // Get a random conference name
+                string conferenceName = conferenceServices.GetRandomConferenceName(); 
+
+                TwilioConferenceCall conferenceRecord =
+                    conferenceServices
+                    .CreateTwilioConferenceRecord(phoneFrom, phoneTo, SERVICE_USER_TWILIO_PHONE_NUMBER, conferenceName, request.CallSid,
+                          hangupIntervalinSeconds,messageIntervalinSeconds, warningIntervalinSeconds);
+
+                conferenceServices.LogMessage(string.Concat("|Step 2 Connecting Caller |",
+                    string.Format("|Connect From {0} |Connect To {1} |Conference Number {2} |Call Start Time Meet Req {3} |Conference Name {4} |Call SID {5}|"
+                      , phoneFrom
+                        , phoneTo
+                           , SERVICE_USER_CONFERENCE_WITH_NUMBER
+                              , callStartAtTimeSlot
+                                , conferenceName
+                                   , request.CallSid)),conferenceRecord.Id);
 
                 conferenceServices.LogMessage(string.Concat("|checking call time values |",
                                     string.Format("|targetCallStartTime {0} |" +
@@ -212,7 +234,8 @@ namespace TwilioConference.Controllers
                                                       "| Minutes to pause {6}|" +
                                                          "|Seconds to pause {7}|" +
                                                            "|messageIntervalinSeconds {8} |" +
-                                                              "|hangupIntervalinSeconds {9}| "
+                                                              "|hangupIntervalinSeconds {9}| " +
+                                                                 "|warningIntervalinSeconds {9}| "
                                       , targetCallStartTime
                                         , targetCallStartTime.LocalDateTime.Minute
                                            , targetCallStartTime.LocalDateTime.Second
@@ -221,45 +244,34 @@ namespace TwilioConference.Controllers
                                                    , request.CallSid
                                                       , intMinutesToPause
                                                         , intSecondsToPause
-                                                          ,messageIntervalinSeconds
-                                                            ,hangupIntervalinSeconds)));
+                                                          , messageIntervalinSeconds
+                                                            , hangupIntervalinSeconds
+                                                               , warningIntervalinSeconds)),conferenceRecord.Id);
 
-
-                // This is phone of the person that calls the twilo number
-                string phoneFrom = from;
-                // Number on which  Service User prefers to take calls - Get from DB     
-                string phoneTo = string.Format("+{0}",SERVICE_USER_CONFERENCE_WITH_NUMBER); 
-                // Get a random conference name
-                string conferenceName = conferenceServices.GetRandomConferenceName(); 
-
-                conferenceServices.LogMessage(string.Concat("|Step 2 Connecting Caller |",
-                    string.Format("|Connect From {0} |Connect To {1} |Conference Number {2} |Call Start Time Meet Req {3} |Conference Name {4} |Call SID {5}|"
-                      , phoneFrom
-                        , phoneTo
-                           , SERVICE_USER_CONFERENCE_WITH_NUMBER
-                              , callStartAtTimeSlot
-                                , conferenceName
-                                   , request.CallSid)));
-
-                TwilioConferenceCall conferenceRecord =
-                    conferenceServices
-                    .CreateTwilioConferenceRecord(phoneFrom, phoneTo, SERVICE_USER_TWILIO_PHONE_NUMBER, conferenceName, request.CallSid,hangupIntervalinSeconds,messageIntervalinSeconds);
 
                 response.Pause(1);
                 response.Say("Connecting Now");
 
-                foreach (var digit in conferenceRecord.PhoneTo)
-                {
-                    response.Say(digit.ToString());
-                }
-
+                //foreach (var digit in conferenceRecord.PhoneTo)
+                //{
+                //    response.Say(digit.ToString());
+                //}
 
                 // Connect phone1 to conference // 3.
                 var dial = new Dial();
+                //dial.Conference(conferenceName
+                //    , waitUrl: "http://twimlets.com/holdmusic?Bucket=com.twilio.music.ambient"
+                //    , statusCallbackEvent: "start end join"
+                //    , statusCallback: string.Format("http://callingserviceconferenceapp.azurewebsites.net/twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id)
+                //    , statusCallbackMethod: "POST"
+                //    , startConferenceOnEnter: true
+                //    , endConferenceOnExit: true);
+                //response.Dial(dial);
+
                 dial.Conference(conferenceName
-                    , waitUrl: "http://twimlets.com/holdmusic?Bucket=com.twilio.music.ambient"
+                    , waitUrl: "http://callingserviceconferenceapp.azurewebsites.net/twilioconference/HoldMusic"
                     , statusCallbackEvent: "start end join"
-                    , statusCallback: string.Format("http://callingserviceconference.azurewebsites.net/twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id)
+                    , statusCallback: string.Format("http://callingserviceconferenceapp.azurewebsites.net/twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id)
                     , statusCallbackMethod: "POST"
                     , startConferenceOnEnter: true
                     , endConferenceOnExit: true);
@@ -267,6 +279,19 @@ namespace TwilioConference.Controllers
             }
 
             return TwiML(response);
+        }
+
+
+        //[System.Web.Mvc.HttpPostGet]
+        public TwiMLResult HoldMusic()
+        {
+            var response = new VoiceResponse();
+
+            string holdMusicUri = "http://com.twilio.music.ambient.s3.amazonaws.com/aerosolspray_-_Living_Taciturn.mp3";
+            response.Play(holdMusicUri);
+
+            return TwiML(response);
+
         }
 
         [System.Web.Mvc.HttpPost]
@@ -282,7 +307,7 @@ namespace TwilioConference.Controllers
 
             string conferenceRecordId = Request.QueryString["id"];
             int id = Int32.Parse(conferenceRecordId);
-
+            
             TwilioConferenceCall conferenceRecord = conferenceServices.GetConferenceRecord(id);
 
             var conferenceStatus = request.StatusCallbackEvent;
@@ -292,7 +317,7 @@ namespace TwilioConference.Controllers
                 case "participant-join":
                     if (request.CallSid == conferenceRecord.PhoneCall1SID)
                     {
-                        conferenceServices.LogMessage("Step 3 " + "Dialing Participant " + conferenceRecord.PhoneTo);
+                        conferenceServices.LogMessage("Step 3 " + "Dialing Participant " + conferenceRecord.PhoneTo,id);
                         ConnectParticipant(conferenceRecord.PhoneTo, conferenceRecord.TwilioPhoneNumber, conferenceRecord.ConferenceName, id);
                     }
                     break;
@@ -311,17 +336,21 @@ namespace TwilioConference.Controllers
                                                        "|TwilioPhone  {2} |" +
                                                            "|Call SID  {3} |" +
                                                        "|messageIntervalinSeconds {4}|" +
-                                                             "|hangupIntervalinSeconds {5}|"
+                                                             "|hangupIntervalinSeconds {5}|" +
+                                                                "|warningIntervalinSeconds {6}|" 
                                       , TIMER_EXE
                                         , conferenceRecordId
                                            , conferenceRecord.TwilioPhoneNumber
                                                    , request.CallSid,
                                                        conferenceRecord.messageIntervalInSeconds,
-                                                         conferenceRecord.hangupIntervalInSeconds)),id);
+                                                         conferenceRecord.hangupIntervalInSeconds,
+                                                           conferenceRecord.warningIntervalInSeconds)),id);
 
                                 string[] args = { conferenceRecordId.ToString(), conferenceRecord.TwilioPhoneNumber,
                                     conferenceRecord.messageIntervalInSeconds.ToString(),
-                                      conferenceRecord.hangupIntervalInSeconds.ToString() };
+                                      conferenceRecord.hangupIntervalInSeconds.ToString(),
+                                        conferenceRecord.warningIntervalInSeconds.ToString()};
+
                                 ProcessStartInfo processStartInfo = new ProcessStartInfo();
                                 processStartInfo.FileName = TIMER_EXE;
                                 processStartInfo.Arguments = string.Join(" ", args);
@@ -349,24 +378,36 @@ namespace TwilioConference.Controllers
             return new TwiMLResult();
         }
 
-   
 
         public DateTimeZone dtzsourceDateTime
         {
             get { return DateTimeZoneProviders.Tzdb[strUTCTimeZoneID]; }
         }
 
-
         //[System.Web.Mvc.HttpPost]
-        public ActionResult ConnectTwilioBot(VoiceRequest request)
+        public ActionResult ConnectTwilioBotMessage(VoiceRequest request)
         {
-            conferenceServices.LogMessage("Playing Message "+ DateTime.Now.ToShortTimeString());
-            var response = new VoiceResponse();
-            Response.ContentType = "text/xml";
-            response.Say("This conference call will be ending in 1 minute");
+            int conferenceRecordId = int.Parse(Request.QueryString["id"]);
+            conferenceServices.LogMessage("Playing Message "+ DateTime.Now.ToShortTimeString(),conferenceRecordId);
+            var response = new VoiceResponse();                        
+            Response.ContentType = "text/xml";            
+            response.Say("This conference call will be ending in 1 minute");            
             response.Hangup();            
             return new TwiMLResult(response);
         }
+
+        public ActionResult ConnectTwilioBotWarning(VoiceRequest request)
+        {
+            int conferenceRecordId = int.Parse(Request.QueryString["id"]);
+            conferenceServices.LogMessage("Playing Warning " + DateTime.Now.ToShortTimeString(), conferenceRecordId);
+            var response = new VoiceResponse();
+            Response.ContentType = "text/xml";            
+            response.Say("hanging up shortly");
+            response.Hangup();
+            return new TwiMLResult(response);
+        }
+
+
 
         void ConnectParticipant(string phoneNumber,string TwilioPhoneNumber, string conferenceName, int conferenceRecordId)
         {
@@ -376,7 +417,7 @@ namespace TwilioConference.Controllers
                     phoneNumber),
                 from: new PhoneNumber(
                     TwilioPhoneNumber),
-                url: new Uri(string.Format("http://callingserviceconference.azurewebsites.net/twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}" // 5.
+                url: new Uri(string.Format("http://callingserviceconferenceapp.azurewebsites.net/twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}" // 5.
                 , conferenceName, conferenceRecordId)));
 
             return;
@@ -416,7 +457,8 @@ namespace TwilioConference.Controllers
                                             ref int intSecondsToPause,
                                               ref string strHourMessage,
                                                 ref double messageIntervalinSeconds,
-                                                    ref double hangupIntervalinSeconds)
+                                                    ref double hangupIntervalinSeconds,
+                                                      ref double warningIntervalinSeconds)
         {
 
             // Assume Call start time is 19:47:34
@@ -430,8 +472,12 @@ namespace TwilioConference.Controllers
                 ((zdtCallStartMinute - 1) % 10) == 0;     // The start minute is within a minute of 00 / 10 / 20 / 30 / 40 / 50 past the hour
 
             // Keep both message & hangup interval at default values of 8 & 9 minutes
-            messageIntervalinSeconds = (8 * 60);
-            hangupIntervalinSeconds = (9 * 60);
+//            messageIntervalinSeconds = (8 * 60);
+//            hangupIntervalinSeconds = (9 * 60);
+
+            messageIntervalinSeconds = 30;
+            hangupIntervalinSeconds = 80;
+            warningIntervalinSeconds = 70;
 
             // Find total absolute seconds of call start time     
             // If call start minute is 47 and call start seconds is 34
@@ -479,10 +525,17 @@ namespace TwilioConference.Controllers
 
             if ((blnCallStartTimeAtTimeSlot) && (intSecondsToPause > 0))
             {
+                //// Total 8 minutes into message, convert to seconds and adjust for 26 seconds into call
+                //messageIntervalinSeconds = (8 * 60) - (60 - intSecondsToPause);
+                //// Total 9 minutes into message, convert to seconds and adjust for 26 seconds into call
+                //hangupIntervalinSeconds = (9 * 60) - (60 - intSecondsToPause);
+
                 // Total 8 minutes into message, convert to seconds and adjust for 26 seconds into call
-                messageIntervalinSeconds = (8 * 60) - (60 - intSecondsToPause);
+                messageIntervalinSeconds = (1 * 60) - (60 - intSecondsToPause);
                 // Total 9 minutes into message, convert to seconds and adjust for 26 seconds into call
-                hangupIntervalinSeconds = (9 * 60) - (60 - intSecondsToPause);
+                hangupIntervalinSeconds = (2 * 60) - (60 - intSecondsToPause);
+                warningIntervalinSeconds = hangupIntervalinSeconds - 10;
+
             }
 
             retVal = blnCallStartTimeAtTimeSlot;
@@ -528,19 +581,6 @@ namespace TwilioConference.Controllers
         //}
 
 
-        string GetRandomConferenceName()
-        {
-            Random rnd = new Random();
-
-            string[] greekAlpha = new string[] { "apple"
-                , "alpha"
-                , "beta"
-                , "gamma"
-                , "delta"
-                , "omega"
-                , "sigma" };
-            return greekAlpha[rnd.Next(0, greekAlpha.Length)] + DateTime.Now.Ticks;
-        }
 
     }
 }

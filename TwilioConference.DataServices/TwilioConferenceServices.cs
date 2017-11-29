@@ -77,7 +77,10 @@ namespace TwilioConference.DataServices
             }
         }
 
-        public TwilioConferenceCall CreateTwilioConferenceRecord(string phoneFrom, string phoneTo, string twilioPhoneNumber, string conferenceName, string phoneCall1Sid, double hangupIntervalinSeconds, double messageIntervalinSeconds)
+        public TwilioConferenceCall CreateTwilioConferenceRecord(string phoneFrom, 
+            string phoneTo, string twilioPhoneNumber, string conferenceName, 
+               string phoneCall1Sid, double hangupIntervalinSeconds, 
+                   double messageIntervalinSeconds, double warningIntervalInSeconds)
         {
             using (var _dbContext = new TwilloDbContext())
             {
@@ -93,6 +96,7 @@ namespace TwilioConference.DataServices
                     callRecord.CallIsActive = true;
                     callRecord.hangupIntervalInSeconds = hangupIntervalinSeconds;
                     callRecord.messageIntervalInSeconds = messageIntervalinSeconds;
+                    callRecord.warningIntervalInSeconds = warningIntervalInSeconds;
                     _dbContext.TwilioConferenceCalls.Add(callRecord);
                     _dbContext.SaveChanges();
 
@@ -157,7 +161,7 @@ namespace TwilioConference.DataServices
         }
 
 
-        public string GetMostRecentConferenceNameFromNumber()
+        public string GetMostRecentConferenceNameFromNumber(ref int conFerenceId)
         {
             //Note an intelligent method is 
             //needed to connect the conferencename to number 2 and 1
@@ -171,8 +175,8 @@ namespace TwilioConference.DataServices
 
                 if(found != null)
                 {
-                    conferenceName = found.ConferenceName;   
-                    
+                    conferenceName = found.ConferenceName;
+                    conFerenceId = found.Id;                    
                 }
             }
 
