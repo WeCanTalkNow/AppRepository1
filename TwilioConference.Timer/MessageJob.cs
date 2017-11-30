@@ -34,7 +34,7 @@ namespace TwilioConference.Timer
             ////   , TWILIO_BOT_NUMBER);
             ////conferenceServices.LogMessage(dataMapValues, id);
             conferenceServices.LogMessage(string.Format("Message Job  begin: {0}", callSid), id);
-            string connectUrl = string.Format("http://callingserviceconference.azurewebsites.net/twilioconference/ConnectTwilioBotMessage?id={0}", id);
+            string connectUrl = string.Format("http://callingserviceproduction.azurewebsites.net//twilioconference/ConnectTwilioBotMessage?id={0}", id);
             
             try
             {
