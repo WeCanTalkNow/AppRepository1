@@ -259,19 +259,11 @@ namespace TwilioConference.Controllers
 
                 // Connect phone1 to conference // 3.
                 var dial = new Dial();
-                //dial.Conference(conferenceName
-                //    , waitUrl: "http://twimlets.com/holdmusic?Bucket=com.twilio.music.ambient"
-                //    , statusCallbackEvent: "start end join"
-                //    , statusCallback: string.Format("http://callingserviceconferenceapp.azurewebsites.net/twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id)
-                //    , statusCallbackMethod: "POST"
-                //    , startConferenceOnEnter: true
-                //    , endConferenceOnExit: true);
-                //response.Dial(dial);
 
                 dial.Conference(conferenceName
-                    , waitUrl: "http://callingserviceconferenceapp.azurewebsites.net/twilioconference/HoldMusic"
+                    , waitUrl: "http://callingserviceconference.azurewebsites.net/twilioconference/HoldMusic"
                     , statusCallbackEvent: "start end join"
-                    , statusCallback: string.Format("http://callingserviceconferenceapp.azurewebsites.net/twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id)
+                    , statusCallback: string.Format("http://callingserviceconference.azurewebsites.net/twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id)
                     , statusCallbackMethod: "POST"
                     , startConferenceOnEnter: true
                     , endConferenceOnExit: true);
@@ -417,7 +409,7 @@ namespace TwilioConference.Controllers
                     phoneNumber),
                 from: new PhoneNumber(
                     TwilioPhoneNumber),
-                url: new Uri(string.Format("http://callingserviceconferenceapp.azurewebsites.net/twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}" // 5.
+                url: new Uri(string.Format("http://callingserviceconference.azurewebsites.net/twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}" // 5.
                 , conferenceName, conferenceRecordId)));
 
             return;
