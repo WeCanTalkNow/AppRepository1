@@ -261,9 +261,9 @@ namespace TwilioConference.Controllers
                 var dial = new Dial();
 
                 dial.Conference(conferenceName
-                    , waitUrl: "http://callingserviceproduction.azurewebsites.net//twilioconference/HoldMusic"
+                    , waitUrl: "http://callingservicetest.azurewebsites.net//twilioconference/HoldMusic"
                     , statusCallbackEvent: "start end join"
-                    , statusCallback: string.Format("http://callingserviceproduction.azurewebsites.net//twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id)
+                    , statusCallback: string.Format("http://callingservicetest.azurewebsites.net//twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id)
                     , statusCallbackMethod: "POST"
                     , startConferenceOnEnter: true
                     , endConferenceOnExit: true);
@@ -409,7 +409,7 @@ namespace TwilioConference.Controllers
                     phoneNumber),
                 from: new PhoneNumber(
                     TwilioPhoneNumber),
-                url: new Uri(string.Format("http://callingserviceproduction.azurewebsites.net//twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}" // 5.
+                url: new Uri(string.Format("http://callingservicetest.azurewebsites.net//twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}" // 5.
                 , conferenceName, conferenceRecordId)));
 
             return;
