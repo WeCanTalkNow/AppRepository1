@@ -246,6 +246,7 @@
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Properties\PublishProfiles\CallingServiceConference - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\CallingServiceConference - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\CallingServiceConferenceApp - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
