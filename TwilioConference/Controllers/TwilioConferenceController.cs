@@ -263,7 +263,7 @@ namespace TwilioConference.Controllers
                 dial.Conference(conferenceName
                     , waitUrl: "http://callingservicetest.azurewebsites.net//twilioconference/HoldMusic"
                     , statusCallbackEvent: "start end join"
-                    , statusCallback: string.Format("http://callingservicetest.azurewebsites.net//twilioconference/HandleConferenceStatusCallback?id={0}&callStartTime={1}", conferenceRecord.Id,targetCallStartTime)
+                    , statusCallback: string.Format("http://callingservicetest.azurewebsites.net//twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id)
                     , statusCallbackMethod: "POST"
                     , startConferenceOnEnter: true
                     , endConferenceOnExit: true);
