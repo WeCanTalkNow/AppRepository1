@@ -11,5 +11,6 @@ namespace TwilioConference.Models
         public string ConferenceSid { get; set; }
         public string CallSid { get; set; }
         public string StatusCallbackEvent { get; set; }
+        public DateTime  Timestamp { get; set; }
     }
 }

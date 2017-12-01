@@ -80,7 +80,7 @@ namespace TwilioConference.DataServices
         public TwilioConferenceCall CreateTwilioConferenceRecord(string phoneFrom, 
             string phoneTo, string twilioPhoneNumber, string conferenceName, 
                string phoneCall1Sid, double hangupIntervalinSeconds, 
-                   double messageIntervalinSeconds, double warningIntervalInSeconds)
+                   double messageIntervalinSeconds, double warningIntervalInSeconds,DateTime callStartTime)
         {
             using (var _dbContext = new TwilloDbContext())
             {
@@ -88,6 +88,7 @@ namespace TwilioConference.DataServices
                 try
                 {
                     callRecord.PhoneFrom = phoneFrom;
+                    callRecord.CallStartTime = callStartTime;
                     callRecord.PhoneTo = phoneTo;
                     callRecord.TwilioPhoneNumber = twilioPhoneNumber;
                     callRecord.ConferenceName = conferenceName;
@@ -369,12 +370,13 @@ namespace TwilioConference.DataServices
 
 
 
-        public void UpdateCallStartTime(int id)
+        public void UpdateConferenceStartTime(int id,DateTime conferenceStartTime)
         {
             using (var _dbContext = new TwilloDbContext())
             {
                 var found = _dbContext.TwilioConferenceCalls.Find(id);
-                found.CallStartTime = DateTime.Now;
+                //found.ConferenceStartTime = DateTime.Now;
+                found.ConferenceStartTime = conferenceStartTime;
                 _dbContext.SaveChanges();
             }
         }

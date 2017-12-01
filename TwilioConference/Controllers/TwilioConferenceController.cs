@@ -209,11 +209,11 @@ namespace TwilioConference.Controllers
                 string phoneTo = string.Format("+{0}",SERVICE_USER_CONFERENCE_WITH_NUMBER); 
                 // Get a random conference name
                 string conferenceName = conferenceServices.GetRandomConferenceName(); 
-
+                
                 TwilioConferenceCall conferenceRecord =
                     conferenceServices
                     .CreateTwilioConferenceRecord(phoneFrom, phoneTo, SERVICE_USER_TWILIO_PHONE_NUMBER, conferenceName, request.CallSid,
-                          hangupIntervalinSeconds,messageIntervalinSeconds, warningIntervalinSeconds);
+                          hangupIntervalinSeconds,messageIntervalinSeconds, warningIntervalinSeconds, ToDateTime(targetCallStartTime));
 
                 conferenceServices.LogMessage(string.Concat("|Step 2 Connecting Caller |",
                     string.Format("|Connect From {0} |Connect To {1} |Conference Number {2} |Call Start Time Meet Req {3} |Conference Name {4} |Call SID {5}|"
@@ -263,7 +263,7 @@ namespace TwilioConference.Controllers
                 dial.Conference(conferenceName
                     , waitUrl: "http://callingservicetest.azurewebsites.net//twilioconference/HoldMusic"
                     , statusCallbackEvent: "start end join"
-                    , statusCallback: string.Format("http://callingservicetest.azurewebsites.net//twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id)
+                    , statusCallback: string.Format("http://callingservicetest.azurewebsites.net//twilioconference/HandleConferenceStatusCallback?id={0}&callStartTime={1}", conferenceRecord.Id,targetCallStartTime)
                     , statusCallbackMethod: "POST"
                     , startConferenceOnEnter: true
                     , endConferenceOnExit: true);
@@ -272,7 +272,11 @@ namespace TwilioConference.Controllers
 
             return TwiML(response);
         }
-
+        
+        public static DateTime ToDateTime(ZonedDateTime dateTime)
+        {
+            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second);
+        }
 
         //[System.Web.Mvc.HttpPostGet]
         public TwiMLResult HoldMusic()
@@ -319,7 +323,8 @@ namespace TwilioConference.Controllers
                         conferenceServices.UpdateConferenceSid(conferenceRecord);
                         try
                         {
-                            conferenceServices.UpdateCallStartTime(id);
+                            string targetCallStartTime = Request.QueryString["targetCallStartTime"];                            
+                            conferenceServices.UpdateConferenceStartTime(id,request.Timestamp);
                             try
                             {
                                 conferenceServices.LogMessage(string.Concat("|Step 4 Starting Scheduled Timer|",
@@ -380,7 +385,7 @@ namespace TwilioConference.Controllers
         public ActionResult ConnectTwilioBotMessage(VoiceRequest request)
         {
             int conferenceRecordId = int.Parse(Request.QueryString["id"]);
-            conferenceServices.LogMessage("Playing Message "+ DateTime.Now.ToShortTimeString(),conferenceRecordId);
+            conferenceServices.LogMessage("Playing Message ",conferenceRecordId);
             var response = new VoiceResponse();                        
             Response.ContentType = "text/xml";            
             response.Say("This conference call will be ending in 1 minute");            
@@ -391,11 +396,11 @@ namespace TwilioConference.Controllers
         public ActionResult ConnectTwilioBotWarning(VoiceRequest request)
         {
             int conferenceRecordId = int.Parse(Request.QueryString["id"]);
-            conferenceServices.LogMessage("Playing Warning " + DateTime.Now.ToShortTimeString(), conferenceRecordId);
+            conferenceServices.LogMessage("Playing Warning ", conferenceRecordId);
             var response = new VoiceResponse();
-            Response.ContentType = "text/xml";            
-            response.Say("hanging up shortly");
-            response.Hangup();
+            Response.ContentType = "text/xml";
+            response.Pause(1);
+            response.Say("this call will be ending shortly");            
             return new TwiMLResult(response);
         }
 
