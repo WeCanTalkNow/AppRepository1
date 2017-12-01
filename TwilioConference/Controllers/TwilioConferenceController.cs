@@ -46,8 +46,10 @@ namespace TwilioConference.Controllers
 
         Boolean AVAILABILITY_CHECK_DONE = false;
         private string strCallServiceUserName = "";
-        private CallResource _crCurrentCall;        
+        private CallResource _crCurrentCall;
+        private ConferenceResource _crCurrentConference;
         private string _strCallSID;
+        private string _strConferenceSID;
         double messageIntervalinSeconds;
         double hangupIntervalinSeconds;
         double warningIntervalinSeconds;
@@ -151,29 +153,21 @@ namespace TwilioConference.Controllers
                 return new TwiMLResult(response);
             }
             else
-            {                
+            {
                 // On first call the control flow should be here
                 //var req = Request.InputStream;
                 //var json = new StreamReader(req).ReadToEnd();
                 //conferenceServices.LogMessage(json);
 
-                LocalDateTime callStartTime = new
-                            LocalDateTime(crCurrentCall.StartTime.Value.Year,
-                                                crCurrentCall.StartTime.Value.Month,
-                                                    crCurrentCall.StartTime.Value.Day,
-                                                            crCurrentCall.StartTime.Value.Hour,
-                                                                crCurrentCall.StartTime.Value.Minute,
-                                                                        crCurrentCall.StartTime.Value.Second);
-
-                ZonedDateTime utcCallStartTime = callStartTime.InZoneLeniently(dtzsourceDateTime);
-                DateTimeZone tzTargetDateTime = DateTimeZoneProviders.Tzdb[strTargetTimeZoneID];
-                ZonedDateTime targetCallStartTime = utcCallStartTime.WithZone(tzTargetDateTime);
+                ZonedDateTime utcCallStartTime, targetCallStartTime;
+                DateTimeZone tzTargetDateTime;
+                CalculateCallStartTimeValues(out utcCallStartTime, out tzTargetDateTime, out targetCallStartTime);
 
                 int intMinutesToPause = 0;
                 int intSecondsToPause = 0;
                 var strHourMessage = string.Empty;
 
-                Boolean callStartAtTimeSlot = 
+                Boolean callStartAtTimeSlot =
                     CallStartAtTimeSlot(
                         targetCallStartTime.LocalDateTime.Minute,
                             targetCallStartTime.LocalDateTime.Second,
@@ -189,7 +183,7 @@ namespace TwilioConference.Controllers
                 response.Say(strCallServiceUserName);
 
                 if (!callStartAtTimeSlot)
-                    {
+                {
                     response.Say("You will be connected in");
                     response.Say(intMinutesToPause.ToString());
                     response.Say("minutes and");
@@ -206,14 +200,14 @@ namespace TwilioConference.Controllers
                 // This is phone of the person that calls the twilo number
                 string phoneFrom = from;
                 // Number on which  Service User prefers to take calls - Get from DB     
-                string phoneTo = string.Format("+{0}",SERVICE_USER_CONFERENCE_WITH_NUMBER); 
+                string phoneTo = string.Format("+{0}", SERVICE_USER_CONFERENCE_WITH_NUMBER);
                 // Get a random conference name
-                string conferenceName = conferenceServices.GetRandomConferenceName(); 
-                
+                string conferenceName = conferenceServices.GetRandomConferenceName();
+
                 TwilioConferenceCall conferenceRecord =
                     conferenceServices
                     .CreateTwilioConferenceRecord(phoneFrom, phoneTo, SERVICE_USER_TWILIO_PHONE_NUMBER, conferenceName, request.CallSid,
-                          hangupIntervalinSeconds,messageIntervalinSeconds, warningIntervalinSeconds, ToDateTime(targetCallStartTime));
+                          hangupIntervalinSeconds, messageIntervalinSeconds, warningIntervalinSeconds, ToDateTime(targetCallStartTime));
 
                 conferenceServices.LogMessage(string.Concat("|Step 2 Connecting Caller |",
                     string.Format("|Connect From {0} |Connect To {1} |Conference Number {2} |Call Start Time Meet Req {3} |Conference Name {4} |Call SID {5}|"
@@ -222,7 +216,7 @@ namespace TwilioConference.Controllers
                            , SERVICE_USER_CONFERENCE_WITH_NUMBER
                               , callStartAtTimeSlot
                                 , conferenceName
-                                   , request.CallSid)),conferenceRecord.Id);
+                                   , request.CallSid)), conferenceRecord.Id);
 
                 conferenceServices.LogMessage(string.Concat("|checking call time values |",
                                     string.Format("|targetCallStartTime {0} |" +
@@ -246,7 +240,7 @@ namespace TwilioConference.Controllers
                                                         , intSecondsToPause
                                                           , messageIntervalinSeconds
                                                             , hangupIntervalinSeconds
-                                                               , warningIntervalinSeconds)),conferenceRecord.Id);
+                                                               , warningIntervalinSeconds)), conferenceRecord.Id);
 
 
                 response.Pause(1);
@@ -272,7 +266,38 @@ namespace TwilioConference.Controllers
 
             return TwiML(response);
         }
-        
+
+        private void CalculateCallStartTimeValues(out ZonedDateTime utcCallStartTime, out DateTimeZone tzTargetDateTime, out ZonedDateTime targetCallStartTime)
+        {
+            LocalDateTime callStartTime = new
+                        LocalDateTime(crCurrentCall.StartTime.Value.Year,
+                                            crCurrentCall.StartTime.Value.Month,
+                                                crCurrentCall.StartTime.Value.Day,
+                                                        crCurrentCall.StartTime.Value.Hour,
+                                                            crCurrentCall.StartTime.Value.Minute,
+                                                                    crCurrentCall.StartTime.Value.Second);
+
+            utcCallStartTime = callStartTime.InZoneLeniently(dtzsourceDateTime);
+            tzTargetDateTime = DateTimeZoneProviders.Tzdb[strTargetTimeZoneID];
+            targetCallStartTime = utcCallStartTime.WithZone(tzTargetDateTime);
+        }
+
+        private void CalculateConferenceStartTimeValues(out ZonedDateTime utcConferenceStartTime, out DateTimeZone tzTargetDateTime, out ZonedDateTime targetCallStartTime)
+        {
+            LocalDateTime conferenceStartTime = new
+                        LocalDateTime(crCurrentConference.DateCreated.Value.Year,
+                                            crCurrentConference.DateCreated.Value.Month,
+                                                crCurrentConference.DateCreated.Value.Day,
+                                                        crCurrentConference.DateCreated.Value.Hour,
+                                                            crCurrentConference.DateCreated.Value.Minute,
+                                                                    crCurrentConference.DateCreated.Value.Second);
+
+            utcConferenceStartTime = conferenceStartTime.InZoneLeniently(dtzsourceDateTime);
+            tzTargetDateTime = DateTimeZoneProviders.Tzdb[strTargetTimeZoneID];
+            targetCallStartTime = utcConferenceStartTime.WithZone(tzTargetDateTime);
+        }
+
+
         public static DateTime ToDateTime(ZonedDateTime dateTime)
         {
             return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second);
@@ -323,25 +348,34 @@ namespace TwilioConference.Controllers
                         conferenceServices.UpdateConferenceSid(conferenceRecord);
                         try
                         {
-                            string targetCallStartTime = Request.QueryString["targetCallStartTime"];                            
+                            // There is an issue with these three lines of code below
+                            // Not working as intended
+                            // To resume from here
+                            //ZonedDateTime utcConferenceStartTime, targetConferenceStartTime;
+                            //DateTimeZone tzTargetDateTime;
+                            //CalculateConferenceStartTimeValues(out utcConferenceStartTime, out tzTargetDateTime, out targetConferenceStartTime);
+
                             conferenceServices.UpdateConferenceStartTime(id,request.Timestamp);
                             try
                             {
                                 conferenceServices.LogMessage(string.Concat("|Step 4 Starting Scheduled Timer|",
+
                                     string.Format("|Exe Name & Path {0} |" +
                                                     "|Conference ID {1} |" +
                                                        "|TwilioPhone  {2} |" +
                                                            "|Call SID  {3} |" +
                                                        "|messageIntervalinSeconds {4}|" +
                                                              "|hangupIntervalinSeconds {5}|" +
-                                                                "|warningIntervalinSeconds {6}|" 
+                                                                "|warningIntervalinSeconds {6}|" +
+                                                                     "|request.Timestamp.Kind {7}|"
                                       , TIMER_EXE
                                         , conferenceRecordId
                                            , conferenceRecord.TwilioPhoneNumber
                                                    , request.CallSid,
                                                        conferenceRecord.messageIntervalInSeconds,
                                                          conferenceRecord.hangupIntervalInSeconds,
-                                                           conferenceRecord.warningIntervalInSeconds)),id);
+                                                           conferenceRecord.warningIntervalInSeconds,
+                                                              request.Timestamp.Kind)),id);
 
                                 string[] args = { conferenceRecordId.ToString(), conferenceRecord.TwilioPhoneNumber,
                                     conferenceRecord.messageIntervalInSeconds.ToString(),
@@ -539,6 +573,16 @@ namespace TwilioConference.Controllers
             return retVal;
         }
 
+        internal ConferenceResource crCurrentConference
+        {
+            get
+            {
+                _crCurrentConference= _crCurrentConference ??
+                     ConferenceResource.Fetch(strConferenceSID);
+                return _crCurrentConference;
+            }
+        }
+
 
         internal CallResource crCurrentCall
         {
@@ -549,6 +593,7 @@ namespace TwilioConference.Controllers
                 return _crCurrentCall;
             }
         }
+
 
         internal string strCallSID
         {
@@ -562,6 +607,20 @@ namespace TwilioConference.Controllers
                 return _strCallSID;
             }
         }
+
+        internal string strConferenceSID
+        {
+            get
+            {
+                _strConferenceSID = _strConferenceSID ??
+                        (!string.IsNullOrEmpty(Request.Params["ConferenceSid"])
+                        ? Request.Params["ConferenceSid"].ToString()
+                        : string.Empty);
+
+                return _strConferenceSID;
+            }
+        }
+
 
 
         //internal string strCallerId
