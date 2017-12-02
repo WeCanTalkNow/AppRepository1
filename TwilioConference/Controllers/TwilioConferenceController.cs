@@ -327,9 +327,6 @@ namespace TwilioConference.Controllers
                         conferenceServices.LogMessage(string.Format("strTargetTimeZoneID {0} ", strTargetTimeZoneID));
                         try
                         {
-                            // There is an issue with these three lines of code below
-                            // Not working as intended
-                            // To resume from here
                             ZonedDateTime utcConferenceStartTime, targetConferenceStartTime;
                             DateTimeZone tzTargetDateTime;
                             CalculateConferenceStartTimeValues(out utcConferenceStartTime, out tzTargetDateTime, out targetConferenceStartTime);
