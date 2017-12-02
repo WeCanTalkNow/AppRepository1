@@ -16,7 +16,13 @@ namespace TwilioConference.DataServices
                 }
                 catch (Exception ex)
                 {
-                    LogMessage(ex.Message);
+                    ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
+                       ex.Message,
+                         ex.Source,
+                           ex.StackTrace,
+                             ex.InnerException));
+                    throw;
+
                 }
             }
         }
@@ -34,8 +40,6 @@ namespace TwilioConference.DataServices
                 _dbContext.SaveChanges();
             }
         }
-
-
 
         //public TwilioConferenceCall CreateTwilioConferenceRecord(string phone1, string phone2)
         //{
@@ -57,23 +61,49 @@ namespace TwilioConference.DataServices
 
         public void UpdateConferenceSid(TwilioConferenceCall conference)
         {
-            using (var _dbContext = new TwilloDbContext())
+            try
             {
-                var found = _dbContext.TwilioConferenceCalls.Find(conference.Id);
-                found.ConferenceSID = conference.ConferenceSID;
-                found.SystemStatus = SystemStatus.SEND_CALL_INITIATED;
-                _dbContext.SaveChanges();
+                using (var _dbContext = new TwilloDbContext())
+                {
+                    var found = _dbContext.TwilioConferenceCalls.Find(conference.Id);
+                    found.ConferenceSID = conference.ConferenceSID;
+                    found.SystemStatus = SystemStatus.SEND_CALL_INITIATED;
+                    _dbContext.SaveChanges();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
+                   ex.Message,
+                     ex.Source,
+                       ex.StackTrace,
+                         ex.InnerException));
+                throw;
             }
         }
 
         public void UpdateCall1Sid(int id, string phone1CallSid)
         {
-            using (var _dbContext = new TwilloDbContext())
+            try
             {
-                var found = _dbContext.TwilioConferenceCalls.Find(id);
-                found.PhoneCall1SID = phone1CallSid;
-                found.SystemStatus = SystemStatus.CONNECT_PERSON_2_INITIATED;
-                _dbContext.SaveChanges();
+                using (var _dbContext = new TwilloDbContext())
+                {
+                    var found = _dbContext.TwilioConferenceCalls.Find(id);
+                    found.PhoneCall1SID = phone1CallSid;
+                    found.SystemStatus = SystemStatus.CONNECT_PERSON_2_INITIATED;
+                    _dbContext.SaveChanges();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
+                   ex.Message,
+                     ex.Source,
+                       ex.StackTrace,
+                         ex.InnerException));
+                throw;
             }
         }
 
@@ -126,8 +156,6 @@ namespace TwilioConference.DataServices
             return greekAlpha[rnd.Next(0, greekAlpha.Length)] + DateTime.Now.Ticks;
         }
 
-
-
         public string GetMostRecentConferenceNameFromNumber(string twilioPhonenumber)
         {
 
@@ -161,7 +189,6 @@ namespace TwilioConference.DataServices
             return conferenceName;
         }
 
-
         public string GetMostRecentConferenceNameFromNumber(ref int conFerenceId)
         {
             //Note an intelligent method is 
@@ -170,17 +197,25 @@ namespace TwilioConference.DataServices
 
             string conferenceName = "mango";
 
-            using (var _dbContext = new TwilloDbContext())
+            try
             {
-                TwilioConferenceCall found = _dbContext.TwilioConferenceCalls.ToList().LastOrDefault();
-
-                if(found != null)
+                using (var _dbContext = new TwilloDbContext())
                 {
-                    conferenceName = found.ConferenceName;
-                    conFerenceId = found.Id;                    
-                }
-            }
+                    TwilioConferenceCall found = _dbContext.TwilioConferenceCalls.ToList().LastOrDefault();
 
+                    if (found != null)
+                    {
+                        conferenceName = found.ConferenceName;
+                        conFerenceId = found.Id;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
+                    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+            }
             return conferenceName;
         }
 
@@ -188,11 +223,19 @@ namespace TwilioConference.DataServices
         {
             TwilioConferenceCall found = null;
 
-            using (var _dbContext = new TwilloDbContext())
+            try
             {
-                found = _dbContext.TwilioConferenceCalls.FirstOrDefault(x => x.ConferenceSID == callSid);
-            }
+                using (var _dbContext = new TwilloDbContext())
+                {
+                    found = _dbContext.TwilioConferenceCalls.FirstOrDefault(x => x.ConferenceSID == callSid);
+                }
 
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
+                    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+            }
             return found;
         }
 
@@ -200,21 +243,42 @@ namespace TwilioConference.DataServices
         {
             TwilioConferenceCall found = null;
 
-            using (var _dbContext = new TwilloDbContext())
+            try
             {
-                found = _dbContext.TwilioConferenceCalls.Find(id);
-            }
+                using (var _dbContext = new TwilloDbContext())
+                {
+                    found = _dbContext.TwilioConferenceCalls.Find(id);
+                }
 
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
+                    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+
+                throw;
+            }
             return found;
         }
 
         public void UpdateSystemStatus(int id, SystemStatus status)
         {
-            using (var _dbContext = new TwilloDbContext())
+            try
             {
-                var found = _dbContext.TwilioConferenceCalls.Find(id);
-                found.SystemStatus = status;
-                _dbContext.SaveChanges();
+                using (var _dbContext = new TwilloDbContext())
+                {
+                    var found = _dbContext.TwilioConferenceCalls.Find(id);
+                    found.SystemStatus = status;
+                    _dbContext.SaveChanges();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
+                    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+
+                throw;
             }
         }
 
@@ -372,11 +436,21 @@ namespace TwilioConference.DataServices
 
         public void UpdateConferenceStartTime(int id,DateTime conferenceStartTime)
         {
-            using (var _dbContext = new TwilloDbContext())
+            try
             {
-                var found = _dbContext.TwilioConferenceCalls.Find(id);
-                found.ConferenceStartTime = conferenceStartTime;
-                _dbContext.SaveChanges();
+                using (var _dbContext = new TwilloDbContext())
+                {
+                    var found = _dbContext.TwilioConferenceCalls.Find(id);
+                    found.ConferenceStartTime = conferenceStartTime;
+                    _dbContext.SaveChanges();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
+                    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+                throw;
             }
         }
     }
