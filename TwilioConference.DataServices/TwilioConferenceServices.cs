@@ -375,7 +375,6 @@ namespace TwilioConference.DataServices
             using (var _dbContext = new TwilloDbContext())
             {
                 var found = _dbContext.TwilioConferenceCalls.Find(id);
-                //found.ConferenceStartTime = DateTime.Now;
                 found.ConferenceStartTime = conferenceStartTime;
                 _dbContext.SaveChanges();
             }
