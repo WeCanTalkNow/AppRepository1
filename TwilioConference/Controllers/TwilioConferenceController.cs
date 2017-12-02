@@ -43,7 +43,7 @@ namespace TwilioConference.Controllers
         static readonly string TIMER_EXE = Path.Combine(WEB_JOBS_DIRECTORY, "TwilioConference.Timer.exe");
 
         const string strUTCTimeZoneID = "Etc/UTC";
-        string strTargetTimeZoneID = "";
+        static string strTargetTimeZoneID = "";
 
         Boolean AVAILABILITY_CHECK_DONE = false;
         private string strCallServiceUserName = "";
@@ -270,7 +270,7 @@ namespace TwilioConference.Controllers
                     var dial = new Dial();
 
                     dial.Conference(conferenceName
-                        , waitUrl: "http://callingservicetest.azurewebsites.net//twilioconference/HoldMusic"
+                        , waitUrl: "http://callingservicetest.azurewebsites.net//twilioconference/ReturnHoldMusicURI"
                         , statusCallbackEvent: "start end join"
                         , statusCallback: string.Format("http://callingservicetest.azurewebsites.net//twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id)
                         , statusCallbackMethod: "POST"
@@ -324,16 +324,16 @@ namespace TwilioConference.Controllers
                     {
                         conferenceRecord.ConferenceSID = request.ConferenceSid;
                         conferenceServices.UpdateConferenceSid(conferenceRecord);
+                        conferenceServices.LogMessage(string.Format("strTargetTimeZoneID {0} ", strTargetTimeZoneID));
                         try
                         {
                             // There is an issue with these three lines of code below
                             // Not working as intended
                             // To resume from here
-                            //ZonedDateTime utcConferenceStartTime, targetConferenceStartTime;
-                            //DateTimeZone tzTargetDateTime;
-                            //CalculateConferenceStartTimeValues(out utcConferenceStartTime, out tzTargetDateTime, out targetConferenceStartTime);
-
-                            conferenceServices.UpdateConferenceStartTime(id, request.Timestamp);
+                            ZonedDateTime utcConferenceStartTime, targetConferenceStartTime;
+                            DateTimeZone tzTargetDateTime;
+                            CalculateConferenceStartTimeValues(out utcConferenceStartTime, out tzTargetDateTime, out targetConferenceStartTime);
+                            conferenceServices.UpdateConferenceStartTime(id, ToDateTime(targetConferenceStartTime));
                             try
                             {
                                 conferenceServices.LogMessage(string.Concat("|Step 4 Starting Scheduled Timer|",
@@ -382,6 +382,7 @@ namespace TwilioConference.Controllers
                                  ex.Source,
                                    ex.StackTrace,
                                      ex.InnerException));
+                            throw;
                         }
                     }
                     break;
@@ -488,6 +489,7 @@ namespace TwilioConference.Controllers
 
         private void CalculateConferenceStartTimeValues(out ZonedDateTime utcConferenceStartTime, out DateTimeZone tzTargetDateTime, out ZonedDateTime targetCallStartTime)
         {
+
             try
             {
                 LocalDateTime conferenceStartTime = new
@@ -512,6 +514,7 @@ namespace TwilioConference.Controllers
                          ex.InnerException));
                 throw;
             }
+            
         }
 
         public static DateTime ToDateTime(ZonedDateTime zonedDateTime)
@@ -533,14 +536,24 @@ namespace TwilioConference.Controllers
         private void ConnectParticipant(string phoneNumber, string TwilioPhoneNumber, string conferenceName, int conferenceRecordId)
         {
 
-            var call = CallResource.Create(
+            try
+            {
+             var call = CallResource.Create(
                 to: new PhoneNumber(
                     phoneNumber),
                 from: new PhoneNumber(
                     TwilioPhoneNumber),
                 url: new Uri(string.Format("http://callingservicetest.azurewebsites.net//twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}" // 5.
                 , conferenceName, conferenceRecordId)));
-
+            }
+            catch (Exception ex)
+            {
+                conferenceServices.ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
+                   ex.Message,
+                     ex.Source,
+                       ex.StackTrace,
+                         ex.InnerException));
+            }
             return;
         }
 
