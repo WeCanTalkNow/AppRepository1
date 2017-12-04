@@ -214,9 +214,9 @@ namespace TwilioConference.Controllers
                             response.Say(strHourMessage);
                             response.Pause(1);
                             response.Say("Please hold ");
-                            //Pause a number of seconds
-                            //response.Pause((intMinutesToPause * 60) + intSecondsToPause);
-                        }
+                        //Pause a number of seconds
+                        response.Pause((intMinutesToPause * 60) + intSecondsToPause);
+                    }
 
                     // This is phone of the person that calls the twilo number
                     string phoneFrom = from;
@@ -270,9 +270,9 @@ namespace TwilioConference.Controllers
                     var dial = new Dial();
 
                     dial.Conference(conferenceName
-                        , waitUrl: "http://callingservicetest.azurewebsites.net//twilioconference/ReturnHoldMusicURI"
+                        , waitUrl: "http://callingserviceproduction.azurewebsites.net//twilioconference/ReturnHoldMusicURI"
                         , statusCallbackEvent: "start end join"
-                        , statusCallback: string.Format("http://callingservicetest.azurewebsites.net//twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id)
+                        , statusCallback: string.Format("http://callingserviceproduction.azurewebsites.net//twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id)
                         , statusCallbackMethod: "POST"
                         , startConferenceOnEnter: true
                         , endConferenceOnExit: true);
@@ -399,6 +399,7 @@ namespace TwilioConference.Controllers
             conferenceServices.LogMessage("Playing Message ", conferenceRecordId);
             var response = new VoiceResponse();
             Response.ContentType = "text/xml";
+            response.Pause(1);
             response.Say("This conference call will be ending in 1 minute");
             response.Hangup();
             return new TwiMLResult(response);
@@ -540,7 +541,7 @@ namespace TwilioConference.Controllers
                     phoneNumber),
                 from: new PhoneNumber(
                     TwilioPhoneNumber),
-                url: new Uri(string.Format("http://callingservicetest.azurewebsites.net//twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}" // 5.
+                url: new Uri(string.Format("http://callingserviceproduction.azurewebsites.net//twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}" // 5.
                 , conferenceName, conferenceRecordId)));
             }
             catch (Exception ex)
@@ -577,16 +578,18 @@ namespace TwilioConference.Controllers
                 ((zdtCallStartMinute - 1) % 10) == 0;     // The start minute is within a minute of 00 / 10 / 20 / 30 / 40 / 50 past the hour
 
             // Keep both message & hangup interval at default values of 8 & 9 minutes
-            //            messageIntervalinSeconds = (8 * 60);
-            //            hangupIntervalinSeconds = (9 * 60);
+            messageIntervalinSeconds = (8 * 60);
+            hangupIntervalinSeconds = (9 * 60);
+            warningIntervalinSeconds = (510);
 
-            messageIntervalinSeconds = 30;
-            hangupIntervalinSeconds = 80;
-            warningIntervalinSeconds = 70;
+            //messageIntervalinSeconds = 30;
+            //hangupIntervalinSeconds = 80;
+            //warningIntervalinSeconds = 70;
 
             // Find total absolute seconds of call start time     
             // If call start minute is 47 and call start seconds is 34
             // intCallStartTotalSeconds = 2854
+
             var intCallStartTotalSeconds =
                 zdtCallStartSecond             //Second the call started
                   + (zdtCallStartMinute * 60); //Minute the call started
