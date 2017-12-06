@@ -215,7 +215,7 @@ namespace TwilioConference.Controllers
                             response.Pause(1);
                             response.Say("Please hold ");
                         //Pause a number of seconds
-                        response.Pause((intMinutesToPause * 60) + intSecondsToPause);
+                        //response.Pause(((intMinutesToPause * 60) + intSecondsToPause) -4) ;
                     }
 
                     // This is phone of the person that calls the twilo number
@@ -243,7 +243,7 @@ namespace TwilioConference.Controllers
                     conferenceServices.LogMessage(string.Concat("|checking call time values |",
                                         string.Format("|targetCallStartTime {0} |" +
                                           "| targetCallStartTime.LocalDateTime.Minute {1} |" +
-                                             " |targetCallStartTime.LocalDateTime.Second {2} |" +
+                                             "|targetCallStartTime.LocalDateTime.Second {2} |" +
                                                 "| utcCallStartTime {3} |" +
                                                    "| tzTargetDateTime {4} |" +
                                                        "| Call SID {5}|" +
@@ -270,9 +270,9 @@ namespace TwilioConference.Controllers
                     var dial = new Dial();
 
                     dial.Conference(conferenceName
-                        , waitUrl: "http://callingservicetrial.azurewebsites.net//twilioconference/ReturnHoldMusicURI"
+                        , waitUrl: "https://callingservicetest.azurewebsites.net//twilioconference/ReturnHoldMusicURI"
                         , statusCallbackEvent: "start end join"
-                        , statusCallback: string.Format("http://callingservicetrial.azurewebsites.net//twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id)
+                        , statusCallback: string.Format("https://callingservicetest.azurewebsites.net//twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id)
                         , statusCallbackMethod: "POST"
                         , startConferenceOnEnter: true
                         , endConferenceOnExit: true);
@@ -324,7 +324,7 @@ namespace TwilioConference.Controllers
                     {
                         conferenceRecord.ConferenceSID = request.ConferenceSid;
                         conferenceServices.UpdateConferenceSid(conferenceRecord);
-                        conferenceServices.LogMessage(string.Format("strTargetTimeZoneID {0} ", strTargetTimeZoneID));
+                        conferenceServices.LogMessage(string.Format("strTargetTimeZoneID {0} ", strTargetTimeZoneID),id);
                         try
                         {
                             ZonedDateTime utcConferenceStartTime, targetConferenceStartTime;
@@ -541,7 +541,7 @@ namespace TwilioConference.Controllers
                     phoneNumber),
                 from: new PhoneNumber(
                     TwilioPhoneNumber),
-                url: new Uri(string.Format("http://callingservicetrial.azurewebsites.net//twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}" // 5.
+                url: new Uri(string.Format("https://callingservicetest.azurewebsites.net//twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}" // 5.
                 , conferenceName, conferenceRecordId)));
             }
             catch (Exception ex)

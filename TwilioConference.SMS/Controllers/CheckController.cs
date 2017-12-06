@@ -1,15 +1,7 @@
-﻿using System;
-using System.Linq;
-using Twilio.TwiML;
+﻿using Twilio.TwiML;
 using Twilio.AspNet.Mvc;
 using System.Web.Mvc;
 using TwilioConference.DataServices;
-
-
-using Twilio.Types;
-
-using Twilio.Rest.Api.V2010.Account;
-using Twilio;
 
 namespace CallingService.SMS.Controllers
 {

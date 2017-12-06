@@ -20,13 +20,31 @@ namespace TwilioConference.Controllers
     {
 
         TwilioConferenceServices conferenceServices;
+        string _smsMessageContents = "";
 
         public TwilioSMSController()
         {
-
             conferenceServices = new TwilioConferenceServices();
+            conferenceServices.LogMessage("In constructor");
 
         }
+
+        [HttpPost]
+        public ActionResult CheckBak()
+        {
+            var response = new MessagingResponse();
+            var message = new Message();
+            var strResponse = string.Empty;
+            Response.ContentType = "text/xml";
+            conferenceServices.LogMessage(string.Format("In check {0}",twilioPhoneNumber));
+            conferenceServices.LogMessage(smsMessageContents);
+            strResponse = EvaluateMessage(smsMessageContents);
+            if (smsMessageContents == "Status") conferenceServices.LogMessage("Okay!!!");
+            response.Message(strResponse, smsFromPhonenumber, twilioPhoneNumber);
+            conferenceServices.LogMessage(string.Format("In Check {0},{1},{2}",strResponse,smsFromPhonenumber,twilioPhoneNumber));
+            return TwiML(response);
+        }
+
 
         [HttpPost]
         public ActionResult Check()
@@ -34,18 +52,27 @@ namespace TwilioConference.Controllers
             var response = new MessagingResponse();
             var message = new Message();
             var strResponse = string.Empty;
-            conferenceServices.LogMessage(string.Format("In check {0}",twilioPhoneNumber));
 
             strResponse = EvaluateMessage(smsMessageContents);
             response.Message(strResponse, smsFromPhonenumber, twilioPhoneNumber);
-            conferenceServices.LogMessage(string.Format("In Check {0},{1},{2}",strResponse,smsFromPhonenumber,twilioPhoneNumber));
+
             return TwiML(response);
         }
-
-        public string smsMessageContents
+        internal string smsMessageContents
         {
-            get { return (!string.IsNullOrEmpty(Request.Params["Body"])) ? Request.Params["Body"].ToString() : string.Empty; }
+            get
+            {
+                _smsMessageContents = _smsMessageContents ??
+                     Request.Params["Body"].ToString();
+                return _smsMessageContents;
+            }
         }
+
+
+        //public string smsMessageContents
+        //{
+        //    get { return (!string.IsNullOrEmpty(Request.Params["Body"])) ? Request.Params["Body"].ToString() : string.Empty; }
+        //}
 
         public string twilioPhoneNumber
         {
@@ -62,9 +89,22 @@ namespace TwilioConference.Controllers
         {
             string strResponse;
             conferenceServices.LogMessage(string.Format("Evaluate message {0} {1}", twilioPhoneNumber, smsMessageContents));
+
+            conferenceServices.LogMessage("about to enter switch");
+
+            conferenceServices.LogMessage(smsMessageContents);
+
+            if (string.Equals(smsMessageContents.ToUpper().Trim(),"STATUS"))
+                conferenceServices.LogMessage("OK Check");
+
+            if (smsMessageContents.Trim().ToUpperInvariant() == "STATUS")
+                conferenceServices.LogMessage("OK Check");
+            
+
             switch (smsMessageContents.ToUpper().Trim())
             {
-                case "STATUS":   // Return current status
+                case "STATUS" :   // Return current status
+                    conferenceServices.LogMessage("Entering here");
                     strResponse = conferenceServices.returnStatus(twilioPhoneNumber);
                     break;
 

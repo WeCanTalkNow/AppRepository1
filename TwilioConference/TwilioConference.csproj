@@ -246,9 +246,8 @@
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Properties\PublishProfiles\CallingServiceProduction - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\CallingServiceSMS - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\CallingServiceTest - Web Deploy.pubxml" />
-    <None Include="Properties\PublishProfiles\CallingServiceTrial - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />

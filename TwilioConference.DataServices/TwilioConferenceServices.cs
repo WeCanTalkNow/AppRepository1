@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Linq;
 using TwilioConference.DataServices.Entities;
+using System.Configuration;
 
 namespace TwilioConference.DataServices
 {
     public class TwilioConferenceServices
     {
+        //Boolean Logging_enabled = bool.Parse(ConfigurationManager.AppSettings["LOGGING_ENABLED"]);
+        
         public TwilioConferenceServices(bool log = false)
         {
             if (log == true)
@@ -13,6 +16,7 @@ namespace TwilioConference.DataServices
                 try
                 {
                     LogMessage("TwilioServices entered at "+DateTime.Now.ToString());
+
                 }
                 catch (Exception ex)
                 {
@@ -303,6 +307,8 @@ namespace TwilioConference.DataServices
 
         public void LogMessage(string message, int id = 0)
         {
+            //if (!Logging_enabled) return;
+            
             using (var _dbContext = new TwilloDbContext())
             {
                 _dbContext.LogMessages.Add(new LogMessage()
