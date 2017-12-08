@@ -63,7 +63,7 @@ namespace TwilioConference.DataServices
         //    }
         //}
 
-        public void UpdateConferenceSid(TwilioConferenceCall conference)
+        public void UpdateConference(TwilioConferenceCall conference)
         {
             try
             {
@@ -87,18 +87,20 @@ namespace TwilioConference.DataServices
             }
         }
 
-        public void UpdateConferenceSid(int id, string Call2Sid)
+        public void UpdateConference(int id, string Call2Sid, SystemStatus systemStatus)
         {
             try
             {
+                //SystemStatus sysStat = (SystemStatus)systemStatus;
                 using (var _dbContext = new TwilloDbContext())
                 {
                     var found = _dbContext.TwilioConferenceCalls.Find(id);
                     if (found != null)
                     {
                         found.PhoneCall2SID = Call2Sid;
+                        found.SystemStatus = systemStatus;
                     }
-                    found.SystemStatus = SystemStatus.CONFERENCE_START;
+
                     _dbContext.SaveChanges();
                 }
 

@@ -17,7 +17,7 @@ namespace TwilioConference.Timer
 
             string twilloAccountSid = dataMap.GetString("twilloAccountSid");
             string twilloAccountToken = dataMap.GetString("twilloAccountToken");
-            string callSid = dataMap.GetString("callSid");
+            string conferenceSid = dataMap.GetString("conferenceSid");
             string SERVICE_USER_TWILIO_PHONE_NUMBER = dataMap.GetString("serviceUserTwilioPhoneNumber");
             string TWILIO_BOT_NUMBER = dataMap.GetString("twilioBotNumber");
 
@@ -33,7 +33,7 @@ namespace TwilioConference.Timer
             ////   , SERVICE_USER_TWILIO_PHONE_NUMBER
             ////   , TWILIO_BOT_NUMBER);
             ////conferenceServices.LogMessage(dataMapValues, id);
-            conferenceServices.LogMessage(string.Format("Message Job  begin: {0}", callSid), id);
+            conferenceServices.LogMessage(string.Format("Message Job  begin: {0}", conferenceSid), id);
             string connectUrl = string.Format("https://callingservicetest.azurewebsites.net//twilioconference/ConnectTwilioBotMessage?id={0}", id);
             
             try
@@ -60,7 +60,7 @@ namespace TwilioConference.Timer
                     postStream.Write(formbytes, 0, formbytes.Length);
                 }
 
-                conferenceServices.LogMessage(string.Format("Message Job  End: {0}", callSid), id);
+                conferenceServices.LogMessage(string.Format("Message Job  End: {0}", conferenceSid), id);
                 WebResponse wr = myReq.GetResponse();
                 Stream receiveStream = wr.GetResponseStream();
                 StreamReader reader = new StreamReader(receiveStream, Encoding.UTF8);

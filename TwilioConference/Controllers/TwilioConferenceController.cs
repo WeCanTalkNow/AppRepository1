@@ -324,25 +324,27 @@ namespace TwilioConference.Controllers
                 case "participant-join":
                     if (request.CallSid == conferenceRecord.PhoneCall1SID)
                     {
-                        string Call2SID = "";
+                        var Call2SID = "";
                         conferenceServices.LogMessage("Step 3 " + "Dialing Participant " + conferenceRecord.PhoneTo, id);                        
                         Call2SID = ConnectParticipant(conferenceRecord.PhoneTo, conferenceRecord.TwilioPhoneNumber, conferenceRecord.ConferenceName, id);
-                        conferenceServices.UpdateConferenceSid(id, Call2SID);
+                        conferenceServices.UpdateConference(id, Call2SID,SystemStatus.ALL_PARTICIPANTS_JOINED);
                     }
                     break;
                 case "participant-leave":                    
-                    if ((request.CallSid == conferenceRecord.PhoneCall1SID)
+                    if ((request.CallSid == conferenceRecord.PhoneCall1SID)   // If either of the two participants leave the confernce by hanging up
                         || (request.CallSid == conferenceRecord.PhoneCall2SID))
                     {
+                        conferenceServices.LogMessage("Participant Left by terminating call", id);
+                        conferenceServices.UpdateConference(id,request.CallSid,SystemStatus.CONFERENCE_END_PREMATURE);
+                        // Write code for conference hangup here
+                        // Need to update the conference status as completed so that the API ino is updated
 
-                        response.Say("One of the dialled parties is no longer available");
-                        response.Say("Plese disconnect the call and try again");                        
                     }
                     break;
                 case "conference-start":
                     {
                         conferenceRecord.ConferenceSID = request.ConferenceSid;
-                        conferenceServices.UpdateConferenceSid(conferenceRecord);
+                        conferenceServices.UpdateConference(conferenceRecord);
                         try
                         {
                             ZonedDateTime utcConferenceStartTime, targetConferenceStartTime;

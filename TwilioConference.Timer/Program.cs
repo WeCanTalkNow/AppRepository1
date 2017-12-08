@@ -54,7 +54,7 @@ namespace TwilioConference.Timer
                 IJobDetail messageNotificationJobDetail =
                     JobBuilder.Create<MessageJob>()
                     .WithIdentity("MessageJob", "TwilioGroup")
-                    .UsingJobData("callSid", conferenceSid)
+                    .UsingJobData("conferenceSid", conferenceSid)
                     .UsingJobData("twilloAccountSid", TWILIO_ACCOUNT_SID)
                     .UsingJobData("twilloAccountToken", TWILIO_ACCOUNT_TOKEN)
                     .UsingJobData("id", id)
@@ -73,7 +73,7 @@ namespace TwilioConference.Timer
                 IJobDetail warningNotificationJobDetail =
                     JobBuilder.Create<CallEndWarningJob>()
                     .WithIdentity("CallEndWarningJob", "TwilioGroup")
-                    .UsingJobData("callSid", conferenceSid)
+                    .UsingJobData("conferenceSid", conferenceSid)
                     .UsingJobData("twilloAccountSid", TWILIO_ACCOUNT_SID)
                     .UsingJobData("twilloAccountToken", TWILIO_ACCOUNT_TOKEN)
                     .UsingJobData("id", id)
@@ -93,7 +93,7 @@ namespace TwilioConference.Timer
                  .WithIdentity("HangUpJob", "TwilioGroup")
                  .UsingJobData("twilloAccountSid", TWILIO_ACCOUNT_SID)
                  .UsingJobData("twilloAccountToken", TWILIO_ACCOUNT_TOKEN)
-                 .UsingJobData("callSid", conferenceSid)
+                 .UsingJobData("conferenceSid", conferenceSid)
                  .UsingJobData("id", id)
                  .UsingJobData("conferenceName", conferenceName)
                  .Build();

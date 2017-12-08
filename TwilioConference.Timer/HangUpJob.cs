@@ -21,19 +21,19 @@ namespace TwilioConference.Timer
 
             string twilloAccountSid = dataMap.GetString("twilloAccountSid");
             string twilloAccountToken = dataMap.GetString("twilloAccountToken");
-            string callSid = dataMap.GetString("callSid");
+            string conferenceSid = dataMap.GetString("conferenceSid");
             int id = dataMap.GetInt("id");
             string conferenceName = dataMap.GetString("conferenceName");
 
             //Make rest request to /HangUpAt10Minutes endpoint
             TwilioClient.Init(twilloAccountSid, twilloAccountToken);
 
-            conferenceServices.LogMessage(string.Format("Hangup timer begin: {0}", callSid), id);
+            conferenceServices.LogMessage(string.Format("Hangup timer begin: {0}", conferenceSid), id);
 
-            ConferenceResource.Update(callSid,
+            ConferenceResource.Update(conferenceSid,
                                 status: ConferenceResource.UpdateStatusEnum.Completed);
 
-            conferenceServices.LogMessage(string.Format("Hangup timer end: {0}", callSid), id);
+            conferenceServices.LogMessage(string.Format("Hangup timer end: {0}", conferenceSid), id);
 
             Thread.Sleep(2000);
 
