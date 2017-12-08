@@ -8,13 +8,10 @@ namespace TwilioConference.DataServices.Entities
 {
     public enum SystemStatus
     {
-        ACTIVE,
-        CANCELED,
-        SEND_CALL_INITIATED,
-        CONNECT_PERSON_2_INITIATED,
-        PERSON_2_PICKED_UP,
-        SENT_9MINUTE_MESSAGE,
-        COMPLETED,
-        DELETE_PENDING
+        RECORD_CREATED,          // 0
+        CONFERENCE_START,        // 1
+        CONFERENCE_COMPLETED,    // 2   TO BE USED ONLY WHEN A CONFERENCE RUNS ITS FULL LENGTH
+        CONFERENC_END_PREMATURE, // 3   TO BE USED ONLY WHEN A PARTICIPANT LEAVES BEFORE THE CONFERENCE ENDS
+        DELETE_PENDING,          // 4    
     }
 }

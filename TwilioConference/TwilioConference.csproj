@@ -26,6 +26,8 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <ApplicationInsightsResourceId>/subscriptions/9bf57e12-6bfb-4b64-b4a0-eb96138fd405/resourcegroups/Default-ApplicationInsights-EastUS/providers/microsoft.insights/components/TwilioConference</ApplicationInsightsResourceId>
+    <ApplicationInsightsAnnotationResourceId>/subscriptions/9bf57e12-6bfb-4b64-b4a0-eb96138fd405/resourcegroups/Default-ApplicationInsights-EastUS/providers/microsoft.insights/components/TwilioConference</ApplicationInsightsAnnotationResourceId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -132,14 +134,17 @@
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
-    <Reference Include="Twilio, Version=5.7.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Twilio.5.7.0\lib\net451\Twilio.dll</HintPath>
+    <Reference Include="Twilio, Version=5.9.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Twilio.5.9.1\lib\net451\Twilio.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Twilio.AspNet.Common, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Twilio.AspNet.Mvc.5.0.2\lib\net451\Twilio.AspNet.Common.dll</HintPath>
+    <Reference Include="Twilio.AspNet.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Twilio.AspNet.Common.5.8.3\lib\net45\Twilio.AspNet.Common.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Twilio.AspNet.Mvc, Version=5.0.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Twilio.AspNet.Mvc.5.0.2\lib\net451\Twilio.AspNet.Mvc.dll</HintPath>
+    <Reference Include="Twilio.AspNet.Mvc, Version=5.8.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Twilio.AspNet.Mvc.5.8.3\lib\net451\Twilio.AspNet.Mvc.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="WebGrease">
       <Private>True</Private>
@@ -209,6 +214,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\TwilioSMSController.cs" />
     <Compile Include="Controllers\TwilioConferenceController.cs" />
+    <Compile Include="ErrorHandler\AiHandleErrorAttribute.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -271,6 +277,7 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Service References\Application Insights\ConnectedService.json" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -298,6 +305,9 @@
       <Project>{386764ed-d445-4565-b441-9735f28e0b12}</Project>
       <Name>TwilioConference.Timer</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

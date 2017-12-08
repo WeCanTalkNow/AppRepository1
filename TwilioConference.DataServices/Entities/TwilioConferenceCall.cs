@@ -11,6 +11,7 @@ namespace TwilioConference.DataServices.Entities
         public int Id { get; set; }
         public string ConferenceSID { get; set; }
         public string PhoneCall1SID { get; set; }
+        public string PhoneCall2SID { get; set; }
         public DateTime? ConferenceStartTime { get; set; }
         public DateTime? CallStartTime { get; set; }
         public bool CallIsActive { get; set; }
