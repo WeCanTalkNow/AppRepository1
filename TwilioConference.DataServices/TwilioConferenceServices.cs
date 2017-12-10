@@ -45,24 +45,7 @@ namespace TwilioConference.DataServices
             }
         }
 
-        //public TwilioConferenceCall CreateTwilioConferenceRecord(string phone1, string phone2)
-        //{
-        //    using (var _dbContext = new TwilloDbContext())
-        //    {
-        //        TwilioConferenceCall callRecord = new TwilioConferenceCall();
-        //        callRecord.Phone1 = phone1;
-        //        callRecord.Phone2 = phone2;
-        //        callRecord.SystemStatus = SystemStatus.ACTIVE;
-        //        callRecord.CallIsActive = true;
-
-
-        //        _dbContext.TwilioConferenceCalls.Add(callRecord);
-        //        _dbContext.SaveChanges();
-
-        //        return callRecord;
-        //    }
-        //}
-
+        
         public void UpdateConference(TwilioConferenceCall conference)
         {
             try
@@ -71,7 +54,7 @@ namespace TwilioConference.DataServices
                 {
                     var found = _dbContext.TwilioConferenceCalls.Find(conference.Id);
                     found.ConferenceSID = conference.ConferenceSID;
-                    found.SystemStatus = SystemStatus.CONFERENCE_START;
+                    found.SystemStatus = SystemStatus.CONFERENCE_IN_PROGRESS;
                     _dbContext.SaveChanges();
                 }
 
@@ -97,8 +80,15 @@ namespace TwilioConference.DataServices
                     var found = _dbContext.TwilioConferenceCalls.Find(id);
                     if (found != null)
                     {
-                        found.PhoneCall2SID = Call2Sid;
-                        found.SystemStatus = systemStatus;
+                        if (found.PhoneCall2SID == null)
+                        {
+                            found.PhoneCall2SID = Call2Sid;
+                        }                           
+                        
+                        if (found.SystemStatus != SystemStatus.CONFERENCE_COMPLETED)
+                        {
+                            found.SystemStatus = systemStatus;
+                        }                        
                     }
 
                     _dbContext.SaveChanges();
@@ -116,29 +106,44 @@ namespace TwilioConference.DataServices
             }
         }
 
-        //public void UpdateCall1Sid(int id, string phone1CallSid)
-        //{
-        //    try
-        //    {
-        //        using (var _dbContext = new TwilloDbContext())
-        //        {
-        //            var found = _dbContext.TwilioConferenceCalls.Find(id);
-        //            found.PhoneCall1SID = phone1CallSid;
-        //            found.SystemStatus = SystemStatus.CONNECT_PERSON_2_INITIATED;
-        //            _dbContext.SaveChanges();
-        //        }
 
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
-        //           ex.Message,
-        //             ex.Source,
-        //               ex.StackTrace,
-        //                 ex.InnerException));
-        //        throw;
-        //    }
-        //}
+        public void UpdateConferenceCall2SID(int id, string Call2Sid)
+        {
+            try
+            {
+                //SystemStatus sysStat = (SystemStatus)systemStatus;
+                using (var _dbContext = new TwilloDbContext())
+                {
+                    var found = _dbContext.TwilioConferenceCalls.Find(id);
+                    if (found != null)
+                    {
+                        if (found.PhoneCall2SID == null)
+                        {
+                            found.PhoneCall2SID = Call2Sid;
+                            found.SystemStatus = SystemStatus.DALING_PARTICIPANT;
+                                                   
+                        }
+                    }
+
+                    _dbContext.SaveChanges();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
+                   ex.Message,
+                     ex.Source,
+                       ex.StackTrace,
+                         ex.InnerException));
+                throw;
+            }
+        }
+
+ 
+
+
+
 
         public TwilioConferenceCall CreateTwilioConferenceRecord(string phoneFrom, 
             string phoneTo, string twilioPhoneNumber, string conferenceName, 
@@ -238,7 +243,7 @@ namespace TwilioConference.DataServices
                     TwilioConferenceCall found = _dbContext.TwilioConferenceCalls
                       .Where(c => c.CallIsActive
                                 && c.ConferenceSID != null
-                                  && c.TwilioPhoneNumber == string.Format("+{0}", twilioPhonenumber))
+                                  && c.TwilioPhoneNumber == twilioPhonenumber)
                       .OrderByDescending(c => c.CallStartTime).SingleOrDefault();
 
                     if (found != null)
@@ -327,8 +332,11 @@ namespace TwilioConference.DataServices
                 using (var _dbContext = new TwilloDbContext())
                 {
                     var found = _dbContext.TwilioConferenceCalls.Find(id);
-                    found.CallIsActive = v;
-                    found.SystemStatus = SystemStatus.CONFERENCE_COMPLETED;
+                    if (found != null)
+                    {
+                        found.CallIsActive = v;
+                        found.SystemStatus = SystemStatus.CONFERENCE_COMPLETED;
+                    }
                     _dbContext.SaveChanges();
                 }
 

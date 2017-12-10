@@ -32,7 +32,6 @@ namespace TwilioConference.Timer
 
             ConferenceResource.Update(conferenceSid,
                                 status: ConferenceResource.UpdateStatusEnum.Completed);
-
             conferenceServices.LogMessage(string.Format("Hangup timer end: {0}", conferenceSid), id);
 
             Thread.Sleep(2000);

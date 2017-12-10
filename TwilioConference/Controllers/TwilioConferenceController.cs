@@ -217,7 +217,7 @@ namespace TwilioConference.Controllers
                             response.Pause(1);
                             response.Say("Please hold ");
                         //Pause a number of seconds
-                        response.Pause(((intMinutesToPause * 60) + intSecondsToPause) -4) ;
+                     //   response.Pause(((intMinutesToPause * 60) + intSecondsToPause) -4) ;
                     }
 
                     // This is phone of the person that calls the twilo number
@@ -327,18 +327,22 @@ namespace TwilioConference.Controllers
                         var Call2SID = "";
                         conferenceServices.LogMessage("Step 3 " + "Dialing Participant " + conferenceRecord.PhoneTo, id);                        
                         Call2SID = ConnectParticipant(conferenceRecord.PhoneTo, conferenceRecord.TwilioPhoneNumber, conferenceRecord.ConferenceName, id);
-                        conferenceServices.UpdateConference(id, Call2SID,SystemStatus.ALL_PARTICIPANTS_JOINED);
+                        conferenceServices.UpdateConferenceCall2SID(id, Call2SID);
                     }
                     break;
                 case "participant-leave":                    
-                    if ((request.CallSid == conferenceRecord.PhoneCall1SID)   // If either of the two participants leave the confernce by hanging up
+                    if ((request.CallSid == conferenceRecord.PhoneCall1SID)   // If either of the two participants leave the confernce 
                         || (request.CallSid == conferenceRecord.PhoneCall2SID))
                     {
-                        conferenceServices.LogMessage("Participant Left by terminating call", id);
-                        conferenceServices.UpdateConference(id,request.CallSid,SystemStatus.CONFERENCE_END_PREMATURE);
-                        // Write code for conference hangup here
-                        // Need to update the conference status as completed so that the API ino is updated
 
+                        // The following lines get executed when the hangup job is executed 
+
+                        var conf = ConferenceResource.Fetch(request.ConferenceSid);                        
+                        if (conf.Status == ConferenceResource.StatusEnum.InProgress)
+                        {
+                            conferenceServices.LogMessage("This call has been ended prematurely", id);
+                            ConferenceResource.Update(request.ConferenceSid, status: ConferenceResource.UpdateStatusEnum.Completed);
+                        }
                     }
                     break;
                 case "conference-start":
@@ -599,15 +603,15 @@ namespace TwilioConference.Controllers
                 ((zdtCallStartMinute - 1) % 10) == 0;     // The start minute is within a minute of 00 / 10 / 20 / 30 / 40 / 50 past the hour
 
             // Keep both message & hangup interval at default values of 8 & 9 minutes for production app
-            messageIntervalinSeconds = (8 * 60);  //480
-            warningIntervalinSeconds = (510);
-            hangupIntervalinSeconds = (9 * 60);  // 540
+            //messageIntervalinSeconds = (8 * 60);  //480
+            //warningIntervalinSeconds = (510);
+            //hangupIntervalinSeconds = (9 * 60);  // 540
 
 
             // Keep both message & hangup interval at default values of 8 & 9 minutes for test app
-            //messageIntervalinSeconds = 30;
-            //warningIntervalinSeconds = 60;
-            //hangupIntervalinSeconds = 90;
+            messageIntervalinSeconds = 30;
+            warningIntervalinSeconds = 60;
+            hangupIntervalinSeconds = 90;
 
             // Find total absolute seconds of call start time     
             // If call start minute is 47 and call start seconds is 34
@@ -656,14 +660,14 @@ namespace TwilioConference.Controllers
             if ((blnCallStartTimeAtTimeSlot) && (intSecondsToPause > 0)) // This effecively means that the call has stated within a minute of the call slot
             {
                 // Total 8 minutes into message, convert to seconds and adjust for 26 seconds into call
-                messageIntervalinSeconds = (8 * 60) - (60 - intSecondsToPause);
-                // Total 9 minutes into message, convert to seconds and adjust for 26 seconds into call
-                hangupIntervalinSeconds = (9 * 60) - (60 - intSecondsToPause);
+                //messageIntervalinSeconds = (8 * 60) - (60 - intSecondsToPause);
+                //// Total 9 minutes into message, convert to seconds and adjust for 26 seconds into call
+                //hangupIntervalinSeconds = (9 * 60) - (60 - intSecondsToPause);
 
                 //// Total 8 minutes into message, convert to seconds and adjust for 26 seconds into call
-                //messageIntervalinSeconds = (1 * 60) - (60 - intSecondsToPause);
+                messageIntervalinSeconds = (1 * 60) - (60 - intSecondsToPause);
                 //// Total 9 minutes into message, convert to seconds and adjust for 26 seconds into call
-                //hangupIntervalinSeconds = (2 * 60) - (60 - intSecondsToPause);
+                hangupIntervalinSeconds = (2 * 60) - (60 - intSecondsToPause);
                 warningIntervalinSeconds = hangupIntervalinSeconds - 10;
 
             }
