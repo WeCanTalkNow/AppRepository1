@@ -61,8 +61,8 @@ namespace TwilioConference.Timer
                 }
 
                 conferenceServices.LogMessage(string.Format("Message Job  End: {0}", conferenceSid), id);
-                WebResponse wr = myReq.GetResponse();
-                Stream receiveStream = wr.GetResponseStream();
+                WebResponse webResponse = myReq.GetResponse();
+                Stream receiveStream = webResponse.GetResponseStream();
                 StreamReader reader = new StreamReader(receiveStream, Encoding.UTF8);
                 string content = reader.ReadToEnd();
                 //conferenceServices.LogMessage(content, id);
@@ -70,8 +70,8 @@ namespace TwilioConference.Timer
                 reader.Dispose();
                 receiveStream.Close();
                 receiveStream.Dispose();
-                wr.Close();
-                wr.Dispose();
+                webResponse.Close();
+                webResponse.Dispose();
 
                 //CallResource.CreateAsync(
                 //    to: new PhoneNumber(Constants.TWILIO_CONFERENCE_NUMBER)
