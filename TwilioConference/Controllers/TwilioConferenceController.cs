@@ -202,22 +202,17 @@ namespace TwilioConference.Controllers
                                                 ref warningIntervalinSeconds);
 
 
-                    response.Pause(1);
-                    response.Say("You've reached the line of ");
-                    response.Say(strCallServiceUserName);
+                    
+                    response.Say("You've reached the line of " + strCallServiceUserName);                    
                     response.Pause(1);
                     if (!callStartAtTimeSlot)
                         {
-                            response.Say("You will be connected in");
-                            response.Say(intMinutesToPause.ToString());
-                            response.Say("minutes and");
-                            response.Say(intSecondsToPause.ToString());
-                            response.Say(" seconds");
-                            response.Say(strHourMessage);
+                            response.Say("You will be connected in " + intMinutesToPause.ToString());
+                            response.Say("minutes and " + intSecondsToPause.ToString() + " seconds " + strHourMessage);
                             response.Pause(1);
                             response.Say("Please hold ");
-                        //Pause a number of seconds
-                     //   response.Pause(((intMinutesToPause * 60) + intSecondsToPause) -4) ;
+                          // Pause a number of seconds
+                          // response.Pause(((intMinutesToPause * 60) + intSecondsToPause) -2) ;
                     }
 
                     // This is phone of the person that calls the twilo number
