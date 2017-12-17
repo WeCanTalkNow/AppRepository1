@@ -211,8 +211,9 @@ namespace TwilioConference.Controllers
                             response.Say("minutes and " + intSecondsToPause.ToString() + " seconds " + strHourMessage);
                             response.Pause(1);
                             response.Say("Please hold ");
-                          // Pause a number of seconds
-                          // response.Pause(((intMinutesToPause * 60) + intSecondsToPause) -2) ;
+
+                          // PRODUCTION CHANGE  (Uncomment line below)
+                            response.Pause(((intMinutesToPause * 60) + intSecondsToPause) -2) ;
                     }
 
                     // This is phone of the person that calls the twilo number
@@ -273,9 +274,9 @@ namespace TwilioConference.Controllers
                     statusCallbackEventlist.Add(Conference.EventEnum.Leave);
 
                     dial.Conference(conferenceName
-                        , waitUrl: new Uri("https://callingservicetest.azurewebsites.net//twilioconference/ReturnHoldMusicURI")
+                        , waitUrl: new Uri("http://callingserviceproduction.azurewebsites.net//twilioconference/ReturnHoldMusicURI")
                         , statusCallbackEvent: statusCallbackEventlist
-                        , statusCallback: new Uri(string.Format("https://callingservicetest.azurewebsites.net//twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id))
+                        , statusCallback: new Uri(string.Format("http://callingserviceproduction.azurewebsites.net//twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id))
                         , statusCallbackMethod: Twilio.Http.HttpMethod.Post
                         , startConferenceOnEnter: true
                         , endConferenceOnExit: true);
@@ -561,7 +562,7 @@ namespace TwilioConference.Controllers
              var call = CallResource.Create(
                 to: new PhoneNumber(phoneNumber),
                 from: new PhoneNumber(TwilioPhoneNumber),
-                url: new Uri(string.Format("https://callingservicetest.azurewebsites.net//twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}",conferenceName,conferenceRecordId)));
+                url: new Uri(string.Format("http://callingserviceproduction.azurewebsites.net//twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}",conferenceName,conferenceRecordId)));
                 callSID = call.Sid;
             }
             catch (Exception ex)
@@ -597,16 +598,18 @@ namespace TwilioConference.Controllers
                 ||                                        // OR
                 ((zdtCallStartMinute - 1) % 10) == 0;     // The start minute is within a minute of 00 / 10 / 20 / 30 / 40 / 50 past the hour
 
+            // PRODUCTION CHANGE (uncomment lines below)
             // Keep both message & hangup interval at default values of 8 & 9 minutes for production app
-            //messageIntervalinSeconds = (8 * 60);  //480
-            //warningIntervalinSeconds = (510);
-            //hangupIntervalinSeconds = (9 * 60);  // 540
+            messageIntervalinSeconds = (8 * 60);  //480
+            warningIntervalinSeconds = (510);
+            hangupIntervalinSeconds = (9 * 60);  // 540
 
 
+            // PRODUCTION CHANGE (comment lines below)
             // Keep both message & hangup interval at default values of 8 & 9 minutes for test app
-            messageIntervalinSeconds = 30;
-            warningIntervalinSeconds = 60;
-            hangupIntervalinSeconds = 90;
+            //messageIntervalinSeconds = 30;
+            //warningIntervalinSeconds = 60;
+            //hangupIntervalinSeconds = 90;
 
             // Find total absolute seconds of call start time     
             // If call start minute is 47 and call start seconds is 34
@@ -654,15 +657,19 @@ namespace TwilioConference.Controllers
 
             if ((blnCallStartTimeAtTimeSlot) && (intSecondsToPause > 0)) // This effecively means that the call has stated within a minute of the call slot
             {
+                // PRODUCTION CHANGE (Uncomment lines below)
                 // Total 8 minutes into message, convert to seconds and adjust for 26 seconds into call
-                //messageIntervalinSeconds = (8 * 60) - (60 - intSecondsToPause);
-                //// Total 9 minutes into message, convert to seconds and adjust for 26 seconds into call
-                //hangupIntervalinSeconds = (9 * 60) - (60 - intSecondsToPause);
+                messageIntervalinSeconds = (8 * 60) - (60 - intSecondsToPause);
+                /// Total 9 minutes into message, convert to seconds and adjust for 26 seconds into call
+                hangupIntervalinSeconds = (9 * 60) - (60 - intSecondsToPause);
 
-                //// Total 8 minutes into message, convert to seconds and adjust for 26 seconds into call
-                messageIntervalinSeconds = (1 * 60) - (60 - intSecondsToPause);
-                //// Total 9 minutes into message, convert to seconds and adjust for 26 seconds into call
-                hangupIntervalinSeconds = (2 * 60) - (60 - intSecondsToPause);
+                // PRODUCTION CHANGE (comment lines below)
+                // Total 8 minutes into message, convert to seconds and adjust for 26 seconds into call
+                //messageIntervalinSeconds = (1 * 60) - (60 - intSecondsToPause);
+                // Total 9 minutes into message, convert to seconds and adjust for 26 seconds into call
+                //hangupIntervalinSeconds = (2 * 60) - (60 - intSecondsToPause);
+
+
                 warningIntervalinSeconds = hangupIntervalinSeconds - 10;
 
             }
