@@ -8,6 +8,8 @@ namespace TwilioConference.DataServices.Entities
 {
     public class LogMessage
     {
+
+        // Adding a comment line
         public int Id { get; set; }
         public int? ConferenceRecordId { get; set; }
         public string Message { get; set; }

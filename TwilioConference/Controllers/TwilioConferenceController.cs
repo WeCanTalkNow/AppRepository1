@@ -197,9 +197,6 @@ namespace TwilioConference.Controllers
                 response.Say("You've reached the line of " + strCallServiceUserName);
                 response.Pause(1);
 
-
-
-
                 if (!callStartAtTimeSlot)
                 {
                     response.Say("You will be connected in " + intMinutesToPause.ToString());
@@ -217,7 +214,7 @@ namespace TwilioConference.Controllers
                     rco.Status = ConferenceResource.StatusEnum.InProgress;
                     var x = ConferenceResource.Read(rco);
                     conferenceServices.LogMessage(x.ToString());
-                    
+
                     foreach (var item in x)
                     {
                         item.Uri.ToString();
