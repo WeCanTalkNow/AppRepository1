@@ -234,7 +234,7 @@ namespace TwilioConference.DataServices
             //needed to connect the conferencename to number 2 and 1
             //from is a stand in
 
-            string conferenceName = "mango";
+            string conferenceName = "";
 
             try
             {
@@ -250,6 +250,10 @@ namespace TwilioConference.DataServices
                     {
                         conferenceName = found.ConferenceName;
                         conFerenceId = found.Id;
+                    }
+                    else
+                    {
+                        conferenceName = "mango"; // Just assigning an arbit value
                     }
                 }
 
@@ -371,7 +375,7 @@ namespace TwilioConference.DataServices
                                             ref string strTimeZoneID)
         {
             var retVal = true;
-
+            
             try
             {
                 using (var _dbContext = new TwilloDbContext())
