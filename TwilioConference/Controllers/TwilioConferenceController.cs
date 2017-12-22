@@ -273,11 +273,12 @@ namespace TwilioConference.Controllers
                 response.Say("Connecting Now");
                 var dial = new Dial();
 
-                var statusCallbackEventlist = new List<Conference.EventEnum>();
-                statusCallbackEventlist.Add(Conference.EventEnum.Start);
-                statusCallbackEventlist.Add(Conference.EventEnum.End);
-                statusCallbackEventlist.Add(Conference.EventEnum.Join);
-                statusCallbackEventlist.Add(Conference.EventEnum.Leave);             
+                var statusCallbackEventlist = new List<Conference.EventEnum>() {
+                    Conference.EventEnum.Start,
+                    Conference.EventEnum.End,
+                    Conference.EventEnum.Join,
+                    Conference.EventEnum.Leave
+                };
 
                 dial.TimeLimit = 600;  // Set total time limit of call
                 dial.Timeout = 30;     // Set total timeout for call (System hangs up after time limit)
@@ -338,7 +339,7 @@ namespace TwilioConference.Controllers
         }
 
         [System.Web.Mvc.HttpPost]
-        public TwiMLResult HandleConferenceStatusCallback(TConferenceRequest request)
+        public TwiMLResult HandleConferenceStatusCallback( TConferenceRequest request)
         {
             //Uncomment below to print full
             //request body
@@ -353,7 +354,7 @@ namespace TwilioConference.Controllers
             int id = Int32.Parse(conferenceRecordId);
 
             TwilioConferenceCall conferenceRecord = conferenceServices.GetConferenceRecord(id);
-            
+
             var conferenceStatus = request.StatusCallbackEvent;
             
             switch (conferenceStatus)
@@ -452,9 +453,39 @@ namespace TwilioConference.Controllers
                     break;
             }
             
-            conferenceServices.LogMessage(string.Format("{0} - {1} - {2}", conferenceStatus, request.ConferenceSid, request.CallSid), id);
+            conferenceServices.LogMessage(string.Format("Conference Status {0} - {1} - {2}", conferenceStatus, request.ConferenceSid, request.CallSid), id);
             return new TwiMLResult(response);
         }
+
+        [System.Web.Mvc.HttpPost]
+        public TwiMLResult HandleCallStatusCallback(VoiceRequest request)
+        {
+            //Uncomment below to print full
+            //request body
+            //var req = Request.InputStream;
+            //var json = new StreamReader(req).ReadToEnd();
+            //conferenceServices.LogMessage(json);
+
+            //  To resume from here and create a datamodel similar to TConferenceRequest for calls and complete this part of the 
+            //  application
+            var response = new VoiceResponse();
+
+
+
+            var callStatus = Response.Status;
+            var requestCallStatus = request.CallStatus;
+
+            var callStatusCode = Response.StatusCode;
+
+            var callStatusCodeDescription = Response.StatusDescription;
+
+            string conferenceRecordId = Request.QueryString["id"];
+            int id = Int32.Parse(conferenceRecordId);
+
+            conferenceServices.LogMessage(string.Format("Call Status {0} - {1} - {2} - {3} - {4}", callStatus, callStatusCode, request.CallSid, requestCallStatus, callStatusCodeDescription), id);
+            return new TwiMLResult(response);
+        }
+
 
         public ActionResult ConnectTwilioBotMessage(VoiceRequest request)
         {
@@ -505,6 +536,7 @@ namespace TwilioConference.Controllers
                 }
 
                 var dial = new Dial();
+                dial.Timeout = 30;
                 dial.Conference(conferenceName);
                 response.Append(dial);
 
@@ -599,13 +631,23 @@ namespace TwilioConference.Controllers
         private string ConnectParticipant(string phoneNumber, string TwilioPhoneNumber, string conferenceName, int conferenceRecordId)
         {
             var callSID = "";
+            var statusCallbackEventlist = new List<String>() {
+            "initiated",
+            "ringing",
+            "answered",
+            "completed" };
+
             try
             {
-             var call = CallResource.Create(
-                to: new PhoneNumber(phoneNumber),
-                from: new PhoneNumber(TwilioPhoneNumber),
-                url: new Uri(string.Format("http://callingservicetest.azurewebsites.net//twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}",conferenceName,conferenceRecordId)));
-                callSID = call.Sid;
+             var call = CallResource.Create(                 
+                 to: new PhoneNumber(phoneNumber),
+                 statusCallbackEvent : statusCallbackEventlist,
+                 statusCallback : new Uri(string.Format("http://callingservicetest.azurewebsites.net//twilioconference/HandleCallStatusCallback?id={0}", conferenceRecordId)),
+                 statusCallbackMethod: Twilio.Http.HttpMethod.Post,
+                 timeout:30,                                         // Number of seconds that the system wil attempt to make call (after which the system will hang up                    
+                 from: new PhoneNumber(TwilioPhoneNumber),
+                 url: new Uri(string.Format("http://callingservicetest.azurewebsites.net//twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}",conferenceName,conferenceRecordId)));
+                 callSID = call.Sid;
             }
             catch (Exception ex)
             {
