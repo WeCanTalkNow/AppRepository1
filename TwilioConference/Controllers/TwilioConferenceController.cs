@@ -350,7 +350,7 @@ namespace TwilioConference.Controllers
             var response = new VoiceResponse();
             
             string conferenceRecordId = Request.QueryString["id"];
-            
+           
             int id = Int32.Parse(conferenceRecordId);
 
             TwilioConferenceCall conferenceRecord = conferenceServices.GetConferenceRecord(id);
@@ -364,7 +364,7 @@ namespace TwilioConference.Controllers
                     {
                         var Call2SID = "";
                         conferenceServices.LogMessage("Step 3 " + "Dialing Participant " + conferenceRecord.PhoneTo, id);                        
-                        Call2SID = ConnectParticipant(conferenceRecord.PhoneTo, conferenceRecord.TwilioPhoneNumber, conferenceRecord.ConferenceName, id);
+                        Call2SID = ConnectParticipant(conferenceRecord.PhoneTo, conferenceRecord.TwilioPhoneNumber, conferenceRecord.ConferenceName,conferenceRecord.ConferenceSID, id);
                         conferenceServices.UpdateConferenceCall2SID(id, Call2SID);
                     }
                     break;
@@ -373,7 +373,7 @@ namespace TwilioConference.Controllers
                         || (request.CallSid == conferenceRecord.PhoneCall2SID))
                     {
 
-                        // The following lines get executed when the hangup job is executed 
+                        // The following lines get executed when the user terminates the call prematurely
 
                         var conf = ConferenceResource.Fetch(request.ConferenceSid);                        
                         if (conf.Status == ConferenceResource.StatusEnum.InProgress)
@@ -449,7 +449,12 @@ namespace TwilioConference.Controllers
                     // To write routine to make call inactive
                     // This might be required to delete all calls that are inactive
                     conferenceServices.UpdateActiveStatus(id, false);
-                    if (newAzureProcess != null) newAzureProcess.Kill();
+                    if (newAzureProcess != null)
+                    {
+                        newAzureProcess.Close();
+                        newAzureProcess.Dispose();
+                        conferenceServices.LogMessage("Conference ended - process killed");
+                    }
                     break;
             }
             
@@ -458,7 +463,7 @@ namespace TwilioConference.Controllers
         }
 
         [System.Web.Mvc.HttpPost]
-        public TwiMLResult HandleCallStatusCallback(VoiceRequest request)
+        public TwiMLResult HandleCallStatusCallback(TCallRequest request)
         {
             //Uncomment below to print full
             //request body
@@ -466,23 +471,18 @@ namespace TwilioConference.Controllers
             //var json = new StreamReader(req).ReadToEnd();
             //conferenceServices.LogMessage(json);
 
-            //  To resume from here and create a datamodel similar to TConferenceRequest for calls and complete this part of the 
-            //  application
             var response = new VoiceResponse();
-
-
-
-            var callStatus = Response.Status;
+            
             var requestCallStatus = request.CallStatus;
+            var requestCallSId = request.CallSid;
 
-            var callStatusCode = Response.StatusCode;
-
-            var callStatusCodeDescription = Response.StatusDescription;
+            var requestFrom = request.From;
 
             string conferenceRecordId = Request.QueryString["id"];
+            string conferenceSID = Request.QueryString["conferenceSID"];
             int id = Int32.Parse(conferenceRecordId);
 
-            conferenceServices.LogMessage(string.Format("Call Status {0} - {1} - {2} - {3} - {4}", callStatus, callStatusCode, request.CallSid, requestCallStatus, callStatusCodeDescription), id);
+            conferenceServices.LogMessage(string.Format("requestCallStatus {0} -  requestCallSId {1} - requestFrom {2}", requestCallStatus, requestCallSId, requestFrom), id);
             return new TwiMLResult(response);
         }
 
@@ -628,21 +628,25 @@ namespace TwilioConference.Controllers
             return TwiML(response);
         }
 
-        private string ConnectParticipant(string phoneNumber, string TwilioPhoneNumber, string conferenceName, int conferenceRecordId)
+        private string ConnectParticipant(string phoneNumber, string TwilioPhoneNumber, string conferenceName, string ConferenceSID, int conferenceRecordId)
         {
             var callSID = "";
             var statusCallbackEventlist = new List<String>() {
             "initiated",
             "ringing",
             "answered",
-            "completed" };
+            "completed",
+            "no-answer",
+            "failed"
+            };
+
 
             try
             {
              var call = CallResource.Create(                 
                  to: new PhoneNumber(phoneNumber),
                  statusCallbackEvent : statusCallbackEventlist,
-                 statusCallback : new Uri(string.Format("http://callingservicetest.azurewebsites.net//twilioconference/HandleCallStatusCallback?id={0}", conferenceRecordId)),
+                 statusCallback : new Uri(string.Format("http://callingservicetest.azurewebsites.net//twilioconference/HandleCallStatusCallback?id={0}&conferenceSID={1}", conferenceRecordId,ConferenceSID)),
                  statusCallbackMethod: Twilio.Http.HttpMethod.Post,
                  timeout:30,                                         // Number of seconds that the system wil attempt to make call (after which the system will hang up                    
                  from: new PhoneNumber(TwilioPhoneNumber),
