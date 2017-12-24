@@ -60,7 +60,6 @@ namespace TwilioConference.Controllers
         double messageIntervalinSeconds;
         double hangupIntervalinSeconds;
         double warningIntervalinSeconds;
-        Process newAzureProcess;
         
 
         private TwilioConferenceServices conferenceServices = new TwilioConferenceServices();
@@ -209,18 +208,19 @@ namespace TwilioConference.Controllers
                     //response.Pause(((intMinutesToPause * 60) + intSecondsToPause) -2) ;
                     //                    ConferenceResource.
                     //                  CallResource.Fetch()
-                    
+
+
+                    // This snippet of code was originally intended to list out multiple conferences from Twilio
+                    // To test out the code only when possible
                     ReadConferenceOptions rco = new ReadConferenceOptions();
                     rco.Status = ConferenceResource.StatusEnum.InProgress;
-                    var x = ConferenceResource.Read(rco);
-                    conferenceServices.LogMessage(x.ToString());
+                    var conferences = ConferenceResource.Read(rco);
 
-                    foreach (var item in x)
+                    foreach (var conference in conferences)
                     {
-                        item.Uri.ToString();
+                        conference.Uri.ToString();
                     }
                 }
-
 
                 // This is phone of the person that calls the twilo number
                 string phoneFrom = fromPhoneNumber;
@@ -355,9 +355,9 @@ namespace TwilioConference.Controllers
 
             TwilioConferenceCall conferenceRecord = conferenceServices.GetConferenceRecord(id);
 
-            var conferenceStatus = request.StatusCallbackEvent;
+            var conferenceCallBackEvent = request.StatusCallbackEvent;
             
-            switch (conferenceStatus)
+            switch (conferenceCallBackEvent)
             {
                 case "participant-join":
                     if (request.CallSid == conferenceRecord.PhoneCall1SID)
@@ -365,6 +365,7 @@ namespace TwilioConference.Controllers
                         var Call2SID = "";
                         conferenceServices.LogMessage("Step 3 " + "Dialing Participant " + conferenceRecord.PhoneTo, id);                        
                         Call2SID = ConnectParticipant(conferenceRecord.PhoneTo, conferenceRecord.TwilioPhoneNumber, conferenceRecord.ConferenceName,conferenceRecord.ConferenceSID, id);
+                        if (Call2SID ==  string.Empty)
                         conferenceServices.UpdateConferenceCall2SID(id, Call2SID);
                     }
                     break;
@@ -379,6 +380,7 @@ namespace TwilioConference.Controllers
                         if (conf.Status == ConferenceResource.StatusEnum.InProgress)
                         {
                             conferenceServices.LogMessage("This call has been ended prematurely", id);
+                            response.Say("The user is no longer connected");
                             ConferenceResource.Update(request.ConferenceSid, status: ConferenceResource.UpdateStatusEnum.Completed);
                         }
                     }
@@ -422,8 +424,7 @@ namespace TwilioConference.Controllers
                                 ProcessStartInfo processStartInfo = new ProcessStartInfo();
                                 processStartInfo.FileName = TIMER_EXE;
                                 processStartInfo.Arguments = string.Join(" ", args);
-                                newAzureProcess =  Process.Start(processStartInfo);
-                                
+                                Process.Start(processStartInfo);                               
                             }
                             catch (Exception ex)
                             {
@@ -448,17 +449,35 @@ namespace TwilioConference.Controllers
                 case "conference-end":
                     // To write routine to make call inactive
                     // This might be required to delete all calls that are inactive
-                    conferenceServices.UpdateActiveStatus(id, false);
-                    if (newAzureProcess != null)
+                    try
                     {
-                        newAzureProcess.Close();
-                        newAzureProcess.Dispose();
-                        conferenceServices.LogMessage("Conference ended - process killed");
+                        conferenceServices.UpdateActiveStatus(id, false);
+                        var conf1 = ConferenceResource.Fetch(request.ConferenceSid);
+                        conferenceServices.LogMessage("In Conference end " + conf1.Status);
+                        var processArray = Process.GetProcessesByName("TwilioConference.Timer");
+                        foreach (var p in processArray)
+                        {
+                            if (p.ProcessName == "TwilioConference.Timer")
+                            {
+                                p.Kill();
+                                p.Close();
+                                p.Dispose();
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        conferenceServices.ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
+                           ex.Message,
+                             ex.Source,
+                               ex.StackTrace,
+                                 ex.InnerException));
+                        throw;
                     }
                     break;
             }
             
-            conferenceServices.LogMessage(string.Format("Conference Status {0} - {1} - {2}", conferenceStatus, request.ConferenceSid, request.CallSid), id);
+            conferenceServices.LogMessage(string.Format("Conference Status {0} - {1} - {2}", conferenceCallBackEvent, request.ConferenceSid, request.CallSid), id);
             return new TwiMLResult(response);
         }
 
@@ -480,9 +499,40 @@ namespace TwilioConference.Controllers
 
             string conferenceRecordId = Request.QueryString["id"];
             string conferenceSID = Request.QueryString["conferenceSID"];
-            int id = Int32.Parse(conferenceRecordId);
 
-            conferenceServices.LogMessage(string.Format("requestCallStatus {0} -  requestCallSId {1} - requestFrom {2}", requestCallStatus, requestCallSId, requestFrom), id);
+            int id = Int32.Parse(conferenceRecordId);
+            UpdateCallOptions uCo = new UpdateCallOptions(requestCallSId);
+            switch (requestCallStatus)
+            {
+                case "failed":
+                    // Update response to user
+                    response.Say("The user is not available or has not connected");
+                    //CallResource.UpdateAsync(requestCallSId, status: CallResource.UpdateStatusEnum.Canceled);
+                    conferenceServices.LogMessage("Failed");
+                    // To resume from here. Not working as expected.
+
+                    // Update conference
+                     // Kill timer process
+                      break;
+
+                case "no-answer":
+                    response.Say("The user is not available or has not connencted");
+                    //CallResource.UpdateAsync(requestCallSId, status: CallResource.UpdateStatusEnum.Canceled);
+                    conferenceServices.LogMessage("no-answer");
+                    break;
+
+                case "busy":
+
+                     break;
+
+                default:
+
+                     break;
+            }
+
+
+
+            conferenceServices.LogMessage(string.Format("requestCallStatus {0} -  requestCallSId {1} - requestFrom {2} conferenceSID {3}", requestCallStatus, requestCallSId, requestFrom,conferenceRecordId), id);
             return new TwiMLResult(response);
         }
 
@@ -636,10 +686,7 @@ namespace TwilioConference.Controllers
             "ringing",
             "answered",
             "completed",
-            "no-answer",
-            "failed"
             };
-
 
             try
             {
