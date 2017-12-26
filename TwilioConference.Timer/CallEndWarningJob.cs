@@ -42,7 +42,7 @@ namespace TwilioConference.Timer
                     string.Format("https://api.twilio.com/2010-04-01/Accounts/{0}/Calls.json", twilloAccountSid);
                 WebRequest myReq = WebRequest.Create(postUrl);
                 string credentials = string.Format("{0}:{1}", twilloAccountSid, twilloAccountToken);
-                CredentialCache mycache = new CredentialCache();
+//                CredentialCache mycache = new CredentialCache();
                 myReq.Headers["Authorization"] = "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes(credentials));
                 string formencodeddata = string.Format("To=+1{0}&From=+1{1}&Url={2}"
                     , SERVICE_USER_TWILIO_PHONE_NUMBER
