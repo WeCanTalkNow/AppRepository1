@@ -33,8 +33,8 @@ namespace TwilioConference.Timer
             ////   , SERVICE_USER_TWILIO_PHONE_NUMBER
             ////   , TWILIO_BOT_NUMBER);
             ////conferenceServices.LogMessage(dataMapValues, id);
-            conferenceServices.LogMessage(string.Format("Message Job  begin: {0}", conferenceSid), id);
-            string connectUrl = string.Format("http://callingservicetest.azurewebsites.net//twilioconference/ConnectTwilioBotMessage?id={0}", id);
+            conferenceServices.LogMessage(string.Format("Step 8 Message Job  begin: {0}", conferenceSid),8, id);
+            string connectUrl = string.Format("http://callingservicetest.azurewebsites.net//twilioconference/ConnectTwilioBotMessage?id={0}",0, id);
             
             try
             {
@@ -61,7 +61,7 @@ namespace TwilioConference.Timer
                     postStream.Write(formbytes, 0, formbytes.Length);
                 }
 
-                conferenceServices.LogMessage(string.Format("Message Job  End: {0}", conferenceSid), id);
+                conferenceServices.LogMessage(string.Format("Step 8 Message Job  End: {0}", conferenceSid),8, id);
                 WebResponse webResponse = myReq.GetResponse();
                 Stream receiveStream = webResponse.GetResponseStream();
                 StreamReader reader = new StreamReader(receiveStream, Encoding.UTF8);
@@ -82,7 +82,11 @@ namespace TwilioConference.Timer
             }
             catch (Exception ex)
             {
-                conferenceServices.LogMessage("On MessageJob Error: " + ex.Message +" "+ ex.Source.ToString() + " "+ex.InnerException.Message, id);                
+                conferenceServices.ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
+                   ex.Message,
+                   ex.Source,
+                   ex.StackTrace,
+                   ex.InnerException));
             }
 
         }

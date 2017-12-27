@@ -21,10 +21,10 @@ namespace TwilioConference.DataServices
                 catch (Exception ex)
                 {
                     ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
-                       ex.Message,
-                         ex.Source,
-                           ex.StackTrace,
-                             ex.InnerException));
+                    ex.Message,
+                    ex.Source,
+                    ex.StackTrace,
+                    ex.InnerException));
                     throw;
 
                 }
@@ -352,7 +352,7 @@ namespace TwilioConference.DataServices
             }
         }
 
-        public void LogMessage(string message, int id = 0)
+        public void LogMessage(string message,int seq =0, int id = 0)
         {
             //if (!Logging_enabled) return;
             
@@ -362,6 +362,7 @@ namespace TwilioConference.DataServices
                 {
                     LogTime = DateTime.Now,
                     ConferenceRecordId = id,
+                    Seq = seq,
                     Message = message
                 });
                 _dbContext.SaveChanges();

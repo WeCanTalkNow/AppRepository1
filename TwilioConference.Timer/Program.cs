@@ -20,26 +20,25 @@ namespace TwilioConference.Timer
             var hangupInterval = double.Parse(args[3]);
             var warningInterval = double.Parse(args[4]);
 
-            conferenceServices.LogMessage("Entered Scheduled Timer at " + DateTime.Now.ToString(), id);
+            conferenceServices.LogMessage("Step 7 Entered Scheduled Timer at " + DateTime.Now.ToString(),7, id);
             string TWILIO_ACCOUNT_SID = ConfigurationManager.AppSettings["TWILIO_ACCOUNT_SID"];
             string TWILIO_ACCOUNT_TOKEN = ConfigurationManager.AppSettings["TWILIO_ACCOUNT_TOKEN"];
 
             string TWILIO_BOT_NUMBER = ConfigurationManager.AppSettings["TWILIO_BOT_NUMBER"];
 
             string conferenceSid = conferenceServices.GetConferenceRecord(id).ConferenceSID;
-            conferenceServices.LogMessage("Conference id is: "+conferenceSid + " TwilioConference.Timer", id);
 
             //Message offset depending on ticks elapsed since call
             DateTimeOffset messageOffset = DateTime.Now.AddSeconds(messageInterval);
-            conferenceServices.LogMessage(string.Format("Message timer will execute at :{0}",messageOffset), id);
+            conferenceServices.LogMessage(string.Format("Step 7 Message timer will execute at :{0}", messageOffset),7, id);
 
             //Warning offset depending on ticks elapsed since call
             DateTimeOffset warningOffset = DateTime.Now.AddSeconds(warningInterval);
-            conferenceServices.LogMessage(string.Format("Warning timer will execute at :{0}", warningOffset), id);
+            conferenceServices.LogMessage(string.Format("Step 7 Warning timer will execute at :{0}", warningOffset),7, id);
 
             //Hangup offset depending on ticks elapsed since call
             DateTimeOffset hangUpOffset = DateTime.Now.AddSeconds(hangupInterval);
-            conferenceServices.LogMessage(string.Format("Hangup timer will execute at :{0}", hangUpOffset), id);
+            conferenceServices.LogMessage(string.Format("Step 7 Hangup timer will execute at :{0}", hangUpOffset),7, id);
 
             // construct a scheduler factory
             ISchedulerFactory schedFact = new StdSchedulerFactory();
@@ -104,31 +103,33 @@ namespace TwilioConference.Timer
 
                 sched.ScheduleJob(hangUpJobDetail, hangUpTrigger);
 
-                conferenceServices.LogMessage(string.Format("Successfuly completed Scheduled Timer - "
-                    + " |Twilio Phone Number-{0}| " 
-                      +  "|Bot Number-{1}| " 
-                        +  "|Conference Name-{2}| "
-                          + "|Conference SID-{3} |"
-                              + "|ID-{4} |"
-                                + " |Number of seconds to message-{5}|"
-                                    + "|Number of seconds to warning-{6}|"
-                                    +"|Number of seconds to hangup-{7}|",
-                    SERVICE_USER_TWILIO_PHONE_NUMBER, 
+                conferenceServices.LogMessage(string.Format("Step 7 Successfuly completed Scheduled Timer - " +
+                     "|Twilio Phone Number-{0}| " +
+                     "|Bot Number-{1}| " +
+                     "|Conference Name-{2}| " +
+                     "|Conference SID-{3} |" +
+                     "|ID-{4} |" +
+                     "|Number of seconds to message-{5}|" +
+                     "|Number of seconds to warning-{6}|" +
+                     "|Number of seconds to hangup-{7}|",
+                      SERVICE_USER_TWILIO_PHONE_NUMBER, 
                       TWILIO_BOT_NUMBER, 
-                        conferenceName, 
-                          conferenceSid, 
-                            id,
-                             messageInterval,
-                               warningInterval,
-                                 hangupInterval)
-                                 ,id);
+                      conferenceName, 
+                      conferenceSid, 
+                      id,
+                      messageInterval,
+                      warningInterval,
+                      hangupInterval)
+                      ,7,id);
             }
             catch (ArgumentException ex)
             {
-
-                conferenceServices.ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
- ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
-
+                conferenceServices.ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
+                ex.Message,
+                ex.Source,
+                ex.StackTrace,
+                ex.InnerException));
+                throw;
             }
         }
     }

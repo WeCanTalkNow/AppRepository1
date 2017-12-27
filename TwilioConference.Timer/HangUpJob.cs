@@ -28,11 +28,11 @@ namespace TwilioConference.Timer
             //Make rest request to /HangUpAt10Minutes endpoint
             TwilioClient.Init(twilloAccountSid, twilloAccountToken);
 
-            conferenceServices.LogMessage(string.Format("Hangup timer begin: {0}", conferenceSid), id);
+            conferenceServices.LogMessage(string.Format("Hangup timer begin: {0}", conferenceSid),10, id);
 
             ConferenceResource.Update(conferenceSid,
                                 status: ConferenceResource.UpdateStatusEnum.Completed);
-            conferenceServices.LogMessage(string.Format("Hangup timer end: {0}", conferenceSid), id);
+            conferenceServices.LogMessage(string.Format("Hangup timer end: {0}", conferenceSid),10, id);
 
             Thread.Sleep(2000);
 

@@ -15,6 +15,7 @@ namespace TwilioConference.DataServices.Entities
         public DateTime? ConferenceStartTime { get; set; }
         public DateTime? CallStartTime { get; set; }
         public bool CallIsActive { get; set; }
+        //public bool CallDisconnectPremature { get; set; }
         public string PhoneFrom { get; set; }
         public string PhoneTo { get; set; }
         public string TwilioPhoneNumber { get; set; }
