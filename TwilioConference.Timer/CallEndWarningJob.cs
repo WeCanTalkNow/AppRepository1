@@ -33,7 +33,7 @@ namespace TwilioConference.Timer
             //   , SERVICE_USER_TWILIO_PHONE_NUMBER
             //   , TWILIO_BOT_NUMBER);
             //conferenceServices.LogMessage(dataMapValues, id);
-            conferenceServices.LogMessage(string.Format("Step 9 Warning Job  begin: {0}", conferenceSid),0, id);
+            conferenceServices.LogMessage(string.Format("Step 9 Warning Job  begin: {0}", conferenceSid),9, id);
             string connectUrl = string.Format("http://callingservicetest.azurewebsites.net//twilioconference/ConnectTwilioBotWarning?id={0}",id);
             try
             {
@@ -58,7 +58,7 @@ namespace TwilioConference.Timer
                 {
                     postStream.Write(formbytes, 0, formbytes.Length);
                 }
-                conferenceServices.LogMessage(string.Format("Step 9 Warning Job  End: {0}", conferenceSid),0, id);
+                conferenceServices.LogMessage(string.Format("Step 9 Warning Job  End: {0}", conferenceSid),9, id);
                 WebResponse wr = myReq.GetResponse();
                 Stream receiveStream = wr.GetResponseStream();
                 StreamReader reader = new StreamReader(receiveStream, Encoding.UTF8);
