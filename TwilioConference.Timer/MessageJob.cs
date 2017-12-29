@@ -53,9 +53,9 @@ namespace TwilioConference.Timer
                 byte[] formbytes = System.Text.ASCIIEncoding.Default.GetBytes(formencodeddata);
                 myReq.Method = "POST";                
                 myReq.ContentType = "application/x-www-form-urlencoded";
-                //conferenceServices.LogMessage("credentials " + credentials.ToString(), id);
-                //conferenceServices.LogMessage("get request stream " + myReq.GetRequestStream(), id);
-                //conferenceServices.LogMessage("formencodeddata " + formencodeddata.ToString(), id);
+                conferenceServices.LogMessage("credentials " + credentials.ToString(), id);
+                conferenceServices.LogMessage("get request stream " + myReq.GetRequestStream(), id);
+                conferenceServices.LogMessage("formencodeddata " + formencodeddata.ToString(), id);
                 using (Stream postStream = myReq.GetRequestStream())
                 {
                     postStream.Write(formbytes, 0, formbytes.Length);
@@ -66,7 +66,7 @@ namespace TwilioConference.Timer
                 Stream receiveStream = webResponse.GetResponseStream();
                 StreamReader reader = new StreamReader(receiveStream, Encoding.UTF8);
                 string content = reader.ReadToEnd();
-                //conferenceServices.LogMessage(content, id);
+                conferenceServices.LogMessage(content, id);
                 reader.Close();
                 reader.Dispose();
                 receiveStream.Close();

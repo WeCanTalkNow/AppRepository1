@@ -3,6 +3,8 @@ using System.Configuration;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
+using System.Text;
 using System.Web.Mvc;
 using Twilio;
 using Twilio.AspNet.Common;
@@ -330,9 +332,11 @@ namespace TwilioConference.Controllers
                                                                ,conferenceName
                                                                ,SERVICE_USER_TWILIO_PHONE_NUMBER))
                                                                ,0,conferenceid);
+
                 var dial = new Dial();
                 var x = dial.Conference(conferenceName);
                 response.Append(dial);
+
             }
             catch (Exception ex)
             {
@@ -543,9 +547,9 @@ namespace TwilioConference.Controllers
                 case "failed":
                     conferenceServices.LogMessage(string.Format("Step 6 Connecting Participant requestCallStatus {0}  conferenceSid {1}  requestCallSId {2} ", requestCallStatus, requestCallSId, conferenceSid), 6, conferenceRecordId);
                     conferenceServices.LogMessage("TwilioPhoneNumber " + TwilioPhoneNumber );
-                    //ConnectTwilioBot(requestCallStatus, conferenceName, conferenceRecordId, TwilioPhoneNumber);
+                    ConnectTwilioBot(requestCallStatus, conferenceName, conferenceRecordId, TwilioPhoneNumber);
                     response.Say("We could not connect you to the conference. Please try later");
-                    ConferenceResource.Update(conferenceSid, status: ConferenceResource.UpdateStatusEnum.Completed);
+                    //ConferenceResource.Update(conferenceSid, status: ConferenceResource.UpdateStatusEnum.Completed);
                     response.Say("We could not connect you to the conference. Please try later");
                     break;
 
@@ -553,9 +557,9 @@ namespace TwilioConference.Controllers
                 case "no-answer":
                     conferenceServices.LogMessage(string.Format("Step 6 Connecting Participant  requestCallSId {0}  conferenceSid {1}  requestCallStatus {2} ", requestCallStatus, requestCallSId, conferenceSid), 6, conferenceRecordId);
                     conferenceServices.LogMessage("TwilioPhoneNumber " + TwilioPhoneNumber);
-                    //ConnectTwilioBot(requestCallStatus, conferenceName, conferenceRecordId, TwilioPhoneNumber);
+                    ConnectTwilioBot(requestCallStatus, conferenceName, conferenceRecordId, TwilioPhoneNumber);
                     response.Say("We could not connect you to the conference. Please try later");
-                    ConferenceResource.Update(conferenceSid, status: ConferenceResource.UpdateStatusEnum.Completed);
+                    //ConferenceResource.Update(conferenceSid, status: ConferenceResource.UpdateStatusEnum.Completed);
                     response.Say("We could not connect you to the conference. Please try later");
                     break;
 
@@ -563,9 +567,9 @@ namespace TwilioConference.Controllers
                 case "busy":
                     conferenceServices.LogMessage(string.Format("Step 6 Connecting Participant {0}  requestCallSId {0}  conferenceSid {1}  requestCallStatus {2} ", requestCallStatus, requestCallSId, conferenceSid), 6, conferenceRecordId);
                     conferenceServices.LogMessage("TwilioPhoneNumber " + TwilioPhoneNumber);
-                    //ConnectTwilioBot(requestCallStatus, conferenceName, conferenceRecordId, TwilioPhoneNumber);
+                    ConnectTwilioBot(requestCallStatus, conferenceName, conferenceRecordId, TwilioPhoneNumber);
                     response.Say("We could not connect you to the conference. Please try later");
-                    ConferenceResource.Update(conferenceSid, status: ConferenceResource.UpdateStatusEnum.Completed);
+                    //ConferenceResource.Update(conferenceSid, status: ConferenceResource.UpdateStatusEnum.Completed);
                     response.Say("We could not connect you to the conference. Please try later");
                     break;
 
@@ -578,7 +582,7 @@ namespace TwilioConference.Controllers
 
         public void  ConnectTwilioBot(string errorCode, string conferenceName, int conferenceRecordId,string SERVICE_USER_TWILIO_PHONE_NUMBER)
         {
-            //var response = new VoiceResponse();
+            var response = new VoiceResponse();
             try
             {
                 var connectUrl = "";
@@ -599,20 +603,58 @@ namespace TwilioConference.Controllers
                 }
 
                 // Authorize 
-                //TwilioClient.Init(TWILIO_ACCOUNT_SID, TWILIO_ACCOUNT_TOKEN);
+                TwilioClient.Init(TWILIO_ACCOUNT_SID, TWILIO_ACCOUNT_TOKEN);
                 // To resume work on 29-12-2017
                 // To determine why SERVICE_USER_TWILIO_PHONE_NUMBER is blank
                 // To work with 382 & 383 conerence records
                 // To create a field for sequencing in log message.
-
+                
                 conferenceServices.LogMessage(string.Format("About to create call resource  SERVICE_USER_TWILIO_PHONE_NUMBER {0} TWILIO_BOT_NUMBER {1} ", SERVICE_USER_TWILIO_PHONE_NUMBER,TWILIO_BOT_NUMBER),0, id: conferenceRecordId);
+
+                //                string postUrl =
+                //                string.Format("https://api.twilio.com/2010-04-01/Accounts/{0}/Calls.json", TWILIO_ACCOUNT_SID);
+                //                WebRequest myReq = WebRequest.Create(postUrl);
+                //                string credentials = string.Format("{0}:{1}", TWILIO_ACCOUNT_SID, TWILIO_ACCOUNT_TOKEN);
+
+                //                myReq.Headers["Authorization"] = "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes(credentials));
+                //                string formencodeddata = string.Format("To=+1{0}&From=+1{1}&Url={2}"
+                //                    , "4159186602"
+                //                    , TWILIO_BOT_NUMBER
+                //                    , connectUrl);
+                //                byte[] formbytes = System.Text.ASCIIEncoding.Default.GetBytes(formencodeddata);
+                //                myReq.Method = "POST";
+                //                myReq.ContentType = "application/x-www-form-urlencoded";
+                //                conferenceServices.LogMessage("credentials " + credentials.ToString(), conferenceRecordId);
+                //                conferenceServices.LogMessage("get request stream " + myReq.GetRequestStream(), conferenceRecordId);
+                //                conferenceServices.LogMessage("formencodeddata " + formencodeddata.ToString(), conferenceRecordId);
+                //                using (Stream postStream = myReq.GetRequestStream())
+                //                {
+                //                    postStream.Write(formbytes, 0, formbytes.Length);
+                //                }
+
+                ////                conferenceServices.LogMessage(string.Format("Step 8 Message Job  End: {0}", conferenceSid), 8, id);
+                //                WebResponse webResponse = myReq.GetResponse();
+                //                Stream receiveStream = webResponse.GetResponseStream();
+                //                StreamReader reader = new StreamReader(receiveStream, Encoding.UTF8);
+                //                string content = reader.ReadToEnd();
+                //                conferenceServices.LogMessage(content);
+                //                reader.Close();
+                //                reader.Dispose();
+                //                receiveStream.Close();
+                //                receiveStream.Dispose();
+                //                webResponse.Close();
+                //                webResponse.Dispose();
+
+
+
+
                 var call = CallResource.Create(
                 to: new PhoneNumber(SERVICE_USER_TWILIO_PHONE_NUMBER)
-                , from: new PhoneNumber("1"+TWILIO_BOT_NUMBER)
-                , url: new Uri(connectUrl)    
+                , from: new PhoneNumber("1" + TWILIO_BOT_NUMBER)
+                , url: new Uri(connectUrl)
                 , method: Twilio.Http.HttpMethod.Post);
 
-                conferenceServices.LogMessage("In ConnectTwilioBot Call SID  " + call.Sid,0,conferenceRecordId);
+                conferenceServices.LogMessage("In ConnectTwilioBot Call SID  " + call.Sid, 0, conferenceRecordId);
                 //var dial = new Dial();
                 //dial.Conference(conferenceName);
                 //response.Append(dial);
@@ -713,6 +755,7 @@ namespace TwilioConference.Controllers
                 dial.Timeout = 30;
                 dial.Conference(conferenceName);
                 response.Append(dial);
+                
 
             }
             catch (Exception ex)
