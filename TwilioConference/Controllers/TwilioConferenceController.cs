@@ -65,9 +65,10 @@ namespace TwilioConference.Controllers
         
 
         private TwilioConferenceServices conferenceServices = new TwilioConferenceServices();
+        private bool secondParticipantConnected;
 
-        #endregion      
-        
+        #endregion
+
         #region Constructor
 
         public TwilioConferenceController() 
@@ -283,7 +284,7 @@ namespace TwilioConference.Controllers
                     Conference.EventEnum.Join,
                     Conference.EventEnum.Leave
                 };
-
+                secondParticipantConnected = false;
                 dial.TimeLimit = 600;  // Set total time limit of call
                 dial.Timeout = 30;     // Set total timeout for call (System hangs up after time limit)
                 dial.Conference(
@@ -293,10 +294,31 @@ namespace TwilioConference.Controllers
                     , statusCallback: new Uri(string.Format("http://callingservicetest.azurewebsites.net//twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id))
                     , statusCallbackMethod: Twilio.Http.HttpMethod.Post
                     , startConferenceOnEnter: true
+                    , eventCallbackUrl: new Uri(string.Format("http://callingservicetest.azurewebsites.net//twilioconference/HandleConferenceEvent?id={0}", conferenceRecord.Id))
                     , beep: Conference.BeepEnum.Onenter                 
                     , endConferenceOnExit: true);
 
                 response.Append(dial);
+
+                //if (!secondParticipantConnected)
+                //{
+                //    conferenceServices.LogMessage("Participant is not connected");
+                //    ConferenceResource.Update(conferenceRecord.ConferenceSID, TWILIO_ACCOUNT_SID, ConferenceResource.UpdateStatusEnum.Completed);
+                //}
+                //else
+                //    conferenceServices.LogMessage("Participant is connected");
+
+                if (!secondParticipantConnected)
+                {
+                    //conferenceServices.LogMessage("Participant is not connected");
+                    //response.Pause(3);
+                    //var confHangup = new Hangup();
+                    //conferenceServices.LogMessage("Should hang up now");
+                    //response.Hangup();
+                    //ConferenceResource.Update(conferenceRecord.ConferenceSID, TWILIO_ACCOUNT_SID, ConferenceResource.UpdateStatusEnum.Completed);
+                }
+
+
             }
             catch (Exception ex)
             {
@@ -392,6 +414,7 @@ namespace TwilioConference.Controllers
                             request.ConferenceSid),3, id);
 
                         Call2SID = ConnectParticipant(conferenceRecord.PhoneTo, conferenceRecord.TwilioPhoneNumber, conferenceRecord.ConferenceName, request.ConferenceSid, id);
+                        ConferenceResource.UpdateAsync(request.ConferenceSid, TWILIO_ACCOUNT_SID, ConferenceResource.UpdateStatusEnum.Completed).Wait();
                         conferenceServices.UpdateConferenceCall2SID(id, Call2SID);
                     }
                     break;
@@ -408,7 +431,7 @@ namespace TwilioConference.Controllers
                         {
                             conferenceServices.LogMessage("This call has been ended prematurely",0 ,id);
                             // Provide a message to caller before disconnecting the conference (TODO)                            
-                            ConferenceResource.Update(request.ConferenceSid, status: ConferenceResource.UpdateStatusEnum.Completed);
+                            //ConferenceResource.Update(request.ConferenceSid, status: ConferenceResource.UpdateStatusEnum.Completed);
                         }
                     }
                     break;
@@ -418,6 +441,61 @@ namespace TwilioConference.Controllers
                         //conferenceServices.UpdateConference(conferenceRecord);
                         try
                         {
+                            // Find number of participants in Conference
+                            // If only 1 partiicpant
+                            // Shut down conference
+                            // Only 1 participant implies that caller could not be connected to user
+                            //var conferences = ConferenceResource.Read(pathAccountSid:null,
+                            //                        dateCreatedBefore:null,dateCreated:null,dateCreatedAfter:null,dateUpdatedBefore:null,dateUpdated:null,dateUpdatedAfter:null,friendlyName: conferenceRecord.ConferenceName);
+                            ////conferences.GetEnumerator()
+
+                            //var conferenceList = new List<ConferenceResource>();
+                            //var confEnum = conferences.GetEnumerator();
+                            //while (confEnum.MoveNext())
+                            //    conferenceList.Add(confEnum.Current);
+
+                            //conferenceServices.LogMessage("No of participants " + conferenceList.Count.ToString());
+                            //foreach (var conference in conferenceList)
+                            //{
+                            //    conferenceServices.LogMessage(string.Format("conference.AccountSid {0} conference.DateCreated {1} conference.FriendlyName {2} conference.Sid{3} conference.Status {4}", conference.AccountSid, conference.DateCreated, conference.FriendlyName, conference.Sid, conference.Status), 0, id);
+
+                            //}
+
+                            var participants = ParticipantResource.Read(request.ConferenceSid);
+                            var participantList = new List<ParticipantResource>();
+                            var partEnum = participants.GetEnumerator();
+                            while (partEnum.MoveNext())
+                                participantList.Add(partEnum.Current);
+
+                            secondParticipantConnected = false;
+
+                            foreach (var participant in participantList)
+                            {
+                                if (conferenceRecord.PhoneCall2SID == participant.CallSid)
+                                {
+                                    secondParticipantConnected = true;
+                                    break;
+                                }                               
+                            }
+                            conferenceServices.LogMessage("No of participants " + participantList.Count.ToString());
+                            foreach (var participant in participantList)
+                            {
+                                conferenceServices.LogMessage(string.Format(" participant.AccountSid {0} participant.DateCreated {1} participant.CallSid {2} participant.ConferenceSid {3} participant.Status {4} ", participant.AccountSid, participant.DateCreated, participant.CallSid, participant.ConferenceSid, participant.Status), 0, id);
+                            }
+
+
+                            if (!secondParticipantConnected)
+                            {
+                                conferenceServices.LogMessage("Participant is not connected");
+                                response.Pause(3);
+                                //var confHangup = new Hangup();
+                                //response.Hangup();
+                                //ConferenceResource.Update(conferenceRecord.ConferenceSID, TWILIO_ACCOUNT_SID, ConferenceResource.UpdateStatusEnum.Completed);
+                            }
+                            else
+                                conferenceServices.LogMessage("Participant is connected");
+
+
                             ZonedDateTime utcConferenceStartTime, targetConferenceStartTime;
                             DateTimeZone tzTargetDateTime;
                             CalculateConferenceStartTimeValues(out utcConferenceStartTime, out tzTargetDateTime, out targetConferenceStartTime);
@@ -516,7 +594,7 @@ namespace TwilioConference.Controllers
             //conferenceServices.LogMessage(json);
 
             var response = new VoiceResponse();
-            
+
             var requestCallStatus = request.CallStatus;
             var requestCallSId = request.CallSid;
 
@@ -546,8 +624,8 @@ namespace TwilioConference.Controllers
                 // Add message to user here by connecting to the confernce before closing the conference
                 case "failed":
                     conferenceServices.LogMessage(string.Format("Step 6 Connecting Participant requestCallStatus {0}  conferenceSid {1}  requestCallSId {2} ", requestCallStatus, requestCallSId, conferenceSid), 6, conferenceRecordId);
-                    conferenceServices.LogMessage("TwilioPhoneNumber " + TwilioPhoneNumber );
-                    ConnectTwilioBot(requestCallStatus, conferenceName, conferenceRecordId, TwilioPhoneNumber);
+                    conferenceServices.LogMessage("TwilioPhoneNumber " + TwilioPhoneNumber);
+                    ConnectTwilioBot(requestCallStatus, conferenceName, conferenceRecordId, TwilioPhoneNumber, conferenceSid);
                     response.Say("We could not connect you to the conference. Please try later");
                     //ConferenceResource.Update(conferenceSid, status: ConferenceResource.UpdateStatusEnum.Completed);
                     response.Say("We could not connect you to the conference. Please try later");
@@ -557,7 +635,7 @@ namespace TwilioConference.Controllers
                 case "no-answer":
                     conferenceServices.LogMessage(string.Format("Step 6 Connecting Participant  requestCallSId {0}  conferenceSid {1}  requestCallStatus {2} ", requestCallStatus, requestCallSId, conferenceSid), 6, conferenceRecordId);
                     conferenceServices.LogMessage("TwilioPhoneNumber " + TwilioPhoneNumber);
-                    ConnectTwilioBot(requestCallStatus, conferenceName, conferenceRecordId, TwilioPhoneNumber);
+                    ConnectTwilioBot(requestCallStatus, conferenceName, conferenceRecordId, TwilioPhoneNumber,conferenceSid);
                     response.Say("We could not connect you to the conference. Please try later");
                     //ConferenceResource.Update(conferenceSid, status: ConferenceResource.UpdateStatusEnum.Completed);
                     response.Say("We could not connect you to the conference. Please try later");
@@ -567,20 +645,50 @@ namespace TwilioConference.Controllers
                 case "busy":
                     conferenceServices.LogMessage(string.Format("Step 6 Connecting Participant {0}  requestCallSId {0}  conferenceSid {1}  requestCallStatus {2} ", requestCallStatus, requestCallSId, conferenceSid), 6, conferenceRecordId);
                     conferenceServices.LogMessage("TwilioPhoneNumber " + TwilioPhoneNumber);
-                    ConnectTwilioBot(requestCallStatus, conferenceName, conferenceRecordId, TwilioPhoneNumber);
+                    ConnectTwilioBot(requestCallStatus, conferenceName, conferenceRecordId, TwilioPhoneNumber,conferenceSid);
                     response.Say("We could not connect you to the conference. Please try later");
                     //ConferenceResource.Update(conferenceSid, status: ConferenceResource.UpdateStatusEnum.Completed);
                     response.Say("We could not connect you to the conference. Please try later");
                     break;
 
                 default:
-                     break;
+                    break;
             }
             return new TwiMLResult(response);
         }
 
 
-        public void  ConnectTwilioBot(string errorCode, string conferenceName, int conferenceRecordId,string SERVICE_USER_TWILIO_PHONE_NUMBER)
+
+
+        [System.Web.Mvc.HttpPost]
+        public TwiMLResult HandleConferenceEvent(VoiceRequest request)
+        {
+            //Uncomment below to print full
+            //request body
+            //var req = Request.InputStream;
+            //var json = new StreamReader(req).ReadToEnd();
+            //conferenceServices.LogMessage(json);
+
+            var response = new VoiceResponse();
+            
+            var requestCallStatus = request.CallStatus;
+            var requestCallSId = request.CallSid;
+
+            var requestFrom = request.From;
+
+            var id = Request.QueryString["id"];
+            var conferenceSid = Request.QueryString["conferenceSid"];
+            var conferenceName = Request.QueryString["conferenceName"];
+            var TwilioPhoneNumber = Request.QueryString["TwilioPhoneNumber"];
+
+            int conferenceRecordId = Int32.Parse(id);
+            conferenceServices.LogMessage("In handle conference event");
+            conferenceServices.LogMessage("Request status " + request.DialCallStatus);
+            return new TwiMLResult(response);
+        }
+
+
+        public void  ConnectTwilioBot(string errorCode, string conferenceName, int conferenceRecordId,string SERVICE_USER_TWILIO_PHONE_NUMBER,string conferenceSid)
         {
             var response = new VoiceResponse();
             try
@@ -655,10 +763,13 @@ namespace TwilioConference.Controllers
                 , method: Twilio.Http.HttpMethod.Post);
 
                 conferenceServices.LogMessage("In ConnectTwilioBot Call SID  " + call.Sid, 0, conferenceRecordId);
+                //ConferenceResource.Update()
                 //var dial = new Dial();
                 //dial.Conference(conferenceName);
                 //response.Append(dial);
 
+                conferenceServices.LogMessage("Conference is connected " + secondParticipantConnected.ToString());
+                //ConferenceResource.Update(conferenceSid, TWILIO_ACCOUNT_SID, ConferenceResource.UpdateStatusEnum.Completed);
             }
             catch (Exception ex)
             {
@@ -685,6 +796,19 @@ namespace TwilioConference.Controllers
             response.Hangup();
             return new TwiMLResult(response);
         }
+
+        public TwiMLResult ConnectTwilioBotBusyStatus(VoiceRequest request)
+        {
+            int conferenceID = int.Parse(Request.QueryString["conferenceID"]);
+            conferenceServices.LogMessage("Playing Message Before Conference Close ", 0, conferenceID);
+            var response = new VoiceResponse();
+            Response.ContentType = "text/xml";
+            response.Pause(1);
+            response.Say("The user could not be connected to the conference. Please try after some time");
+            response.Hangup();
+            return new TwiMLResult(response);
+        }
+
 
         public TwiMLResult ConnectTwilioBotNoAnswerStatus(VoiceRequest request)
         {
@@ -845,7 +969,7 @@ namespace TwilioConference.Controllers
             return TwiML(response);
         }
 
-        private string ConnectParticipant(string phoneNumber, string TwilioPhoneNumber, string conferenceName, string ConferenceSid, int conferenceRecordId)
+        private string ConnectParticipant(string phoneTo, string TwilioPhoneNumber, string conferenceName, string ConferenceSid, int conferenceRecordId)
         {
             var callSID = "";
             var statusCallbackEventlist = new List<String>() {
@@ -860,7 +984,7 @@ namespace TwilioConference.Controllers
             try
             {
              var call = CallResource.Create(       
-                 to: new PhoneNumber(phoneNumber),
+                 to: new PhoneNumber(phoneTo),
                  statusCallbackEvent : statusCallbackEventlist,
                  statusCallback : new Uri(string.Format("http://callingservicetest.azurewebsites.net//twilioconference/HandleCallStatusCallback?id={0}&conferenceSid={1}&conferenceName={2}&TwilioPhoneNumber={3}", conferenceRecordId,ConferenceSid,conferenceName, TwilioPhoneNumber)),
                  statusCallbackMethod: Twilio.Http.HttpMethod.Post,
