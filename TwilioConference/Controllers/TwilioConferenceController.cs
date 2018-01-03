@@ -197,23 +197,23 @@ namespace TwilioConference.Controllers
                         response.Pause(1);
                         response.Say("Please hold ");
 
-                        // PRODUCTION CHANGE  (Uncomment line below)
-                        //response.Pause(((intMinutesToPause * 60) + intSecondsToPause) -2) ;
+                    // PRODUCTION CHANGE  (Uncomment line below)
+                    response.Pause(((intMinutesToPause * 60) + intSecondsToPause) - 2);
 
-                        #region Experimental Code
-                        // This snippet of code was originally intended to list out multiple conferences from Twilio
-                        // To test out the code only when possible
-                        //ReadConferenceOptions rco = new ReadConferenceOptions();
-                        //rco.Status = ConferenceResource.StatusEnum.InProgress;
-                        //var conferences = ConferenceResource.Read(rco);
+                    #region Experimental Code
+                    // This snippet of code was originally intended to list out multiple conferences from Twilio
+                    // To test out the code only when possible
+                    //ReadConferenceOptions rco = new ReadConferenceOptions();
+                    //rco.Status = ConferenceResource.StatusEnum.InProgress;
+                    //var conferences = ConferenceResource.Read(rco);
 
-                        //foreach (var conference in conferences)
-                        //{
-                        //    conference.Uri.ToString();
-                        //}
+                    //foreach (var conference in conferences)
+                    //{
+                    //    conference.Uri.ToString();
+                    //}
 
-                        #endregion
-                    }
+                    #endregion
+                }
 
                     // This is phone of the person that calls the twilo number
                     string phoneFrom = fromPhoneNumber;
@@ -285,9 +285,9 @@ namespace TwilioConference.Controllers
                 dial.Timeout = TIMEOUT_INTERVAL;     // Set total timeout for call (System hangs up after time limit)
                 dial.Conference(
                     name: conferenceName                                                                               
-                    , waitUrl: new Uri("http://callingservicetest.azurewebsites.net//twilioconference/ReturnHoldMusicURI")
+                    , waitUrl: new Uri("https://callingservicetrial.azurewebsites.net//twilioconference/ReturnHoldMusicURI")
                     , statusCallbackEvent: statusCallbackEventlist
-                    , statusCallback: new Uri(string.Format("http://callingservicetest.azurewebsites.net//twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id))
+                    , statusCallback: new Uri(string.Format("https://callingservicetrial.azurewebsites.net//twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id))
                     , statusCallbackMethod: Twilio.Http.HttpMethod.Post
                     , startConferenceOnEnter: true
                     , beep: Conference.BeepEnum.Onenter                 
@@ -721,13 +721,13 @@ namespace TwilioConference.Controllers
                 switch (errorCode)
                 {
                     case "failed":
-                        connectUrl = string.Format("http://callingservicetest.azurewebsites.net//twilioconference/ConnectTwilioBotFailedStatus?conferenceID={0}",conferenceRecordId);
+                        connectUrl = string.Format("https://callingservicetrial.azurewebsites.net//twilioconference/ConnectTwilioBotFailedStatus?conferenceID={0}",conferenceRecordId);
                         break;
                     case "no-answer":
-                        connectUrl = string.Format("http://callingservicetest.azurewebsites.net//twilioconference/ConnectTwilioBotNoAnswerStatus?conferenceID={0}", conferenceRecordId);
+                        connectUrl = string.Format("https://callingservicetrial.azurewebsites.net//twilioconference/ConnectTwilioBotNoAnswerStatus?conferenceID={0}", conferenceRecordId);
                         break;
                     case "busy":
-                        connectUrl = string.Format("http://callingservicetest.azurewebsites.net//twilioconference/ConnectTwilioBotBusyStatus?conferenceID={0}", conferenceRecordId);
+                        connectUrl = string.Format("https://callingservicetrial.azurewebsites.net//twilioconference/ConnectTwilioBotBusyStatus?conferenceID={0}", conferenceRecordId);
                         break;
                     default:
                         break;
@@ -1020,10 +1020,10 @@ namespace TwilioConference.Controllers
                  from: new PhoneNumber(TwilioPhoneNumber),
                  to: new PhoneNumber(phoneTo),
                  statusCallbackEvent : statusCallbackEventlist,
-                 statusCallback : new Uri(string.Format("http://callingservicetest.azurewebsites.net//twilioconference/HandleCallStatusCallback?id={0}&conferenceSid={1}&conferenceName={2}&TwilioPhoneNumber={3}", conferenceRecordId,ConferenceSid,conferenceName, TwilioPhoneNumber)),
+                 statusCallback : new Uri(string.Format("https://callingservicetrial.azurewebsites.net//twilioconference/HandleCallStatusCallback?id={0}&conferenceSid={1}&conferenceName={2}&TwilioPhoneNumber={3}", conferenceRecordId,ConferenceSid,conferenceName, TwilioPhoneNumber)),
                  statusCallbackMethod: Twilio.Http.HttpMethod.Post,
                  timeout:TIMEOUT_INTERVAL,                                      // Number of seconds that the system wil attempt to make call (after which the system will hang up                    
-                 url: new Uri(string.Format("http://callingservicetest.azurewebsites.net//twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}",conferenceName,conferenceRecordId)));
+                 url: new Uri(string.Format("https://callingservicetrial.azurewebsites.net//twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}",conferenceName,conferenceRecordId)));
 
                  callSID = call.Sid;
             }
@@ -1071,15 +1071,15 @@ namespace TwilioConference.Controllers
 
                 // PRODUCTION CHANGE (uncomment lines below)
                 // Keep both message & hangup interval at default values of 8 & 9 minutes for production app
-                //messageIntervalinSeconds = (8 * 60);  //480
-                //warningIntervalinSeconds = (510);
-                //hangupIntervalinSeconds = (9 * 60);  // 540
+                messageIntervalinSeconds = (8 * 60);  //480
+                warningIntervalinSeconds = (510);
+                hangupIntervalinSeconds = (9 * 60);  // 540
 
                 // PRODUCTION CHANGE (comment lines below)
                 // Keep both message & hangup interval at default values of 8 & 9 minutes for test app
-                messageIntervalinSeconds = 30;
-                warningIntervalinSeconds = 60;
-                hangupIntervalinSeconds = 90;
+                //messageIntervalinSeconds = 30;
+                //warningIntervalinSeconds = 60;
+                //hangupIntervalinSeconds = 90;
 
                 // Find total absolute seconds of call start time     
                 // If call start minute is 47 and call start seconds is 34
@@ -1129,15 +1129,15 @@ namespace TwilioConference.Controllers
                 {
                     // PRODUCTION CHANGE (Uncomment lines below)
                     // Total 8 minutes into message, convert to seconds and adjust for 26 seconds into call
-                    //messageIntervalinSeconds = (8 * 60) - (60 - intSecondsToPause);
+                    messageIntervalinSeconds = (8 * 60) - (60 - intSecondsToPause);
                     ///// Total 9 minutes into message, convert to seconds and adjust for 26 seconds into call
-                    //hangupIntervalinSeconds = (9 * 60) - (60 - intSecondsToPause);
+                    hangupIntervalinSeconds = (9 * 60) - (60 - intSecondsToPause);
 
                     // PRODUCTION CHANGE (comment lines below)
                     // Total 8 minutes into message, convert to seconds and adjust for 26 seconds into call
-                    messageIntervalinSeconds = (1 * 60) - (60 - intSecondsToPause);
+                    //messageIntervalinSeconds = (1 * 60) - (60 - intSecondsToPause);
                     // Total 9 minutes into message, convert to seconds and adjust for 26 seconds into call
-                    hangupIntervalinSeconds = (2 * 60) - (60 - intSecondsToPause);
+                    //hangupIntervalinSeconds = (2 * 60) - (60 - intSecondsToPause);
 
 
                     warningIntervalinSeconds = hangupIntervalinSeconds - 10;
