@@ -63,9 +63,9 @@ namespace TwilioConference.DataServices
             {
                 ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
                    ex.Message,
-                     ex.Source,
-                       ex.StackTrace,
-                         ex.InnerException));
+                   ex.Source,
+                   ex.StackTrace,
+                   ex.InnerException));
                 throw;
             }
         }
@@ -99,9 +99,9 @@ namespace TwilioConference.DataServices
             {
                 ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
                    ex.Message,
-                     ex.Source,
-                       ex.StackTrace,
-                         ex.InnerException));
+                   ex.Source,
+                   ex.StackTrace,
+                   ex.InnerException));
                 throw;
             }
         }
@@ -133,9 +133,9 @@ namespace TwilioConference.DataServices
             {
                 ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
                    ex.Message,
-                     ex.Source,
-                       ex.StackTrace,
-                         ex.InnerException));
+                   ex.Source,
+                   ex.StackTrace,
+                   ex.InnerException));
                 throw;
             }
         }
@@ -172,8 +172,11 @@ namespace TwilioConference.DataServices
                 }
                 catch (Exception ex)
                 {
-                    ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
-                        ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+                    ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
+                       ex.Message,
+                       ex.Source,
+                       ex.StackTrace,
+                       ex.InnerException));
                     throw;
                 }
                 return callRecord;
@@ -230,9 +233,6 @@ namespace TwilioConference.DataServices
 
         public string GetMostRecentConferenceNameFromNumber(ref int conFerenceId, string twilioPhonenumber)
         {
-            //Note an intelligent method is 
-            //needed to connect the conferencename to number 2 and 1
-            //from is a stand in
 
             string conferenceName = "";
 
@@ -242,10 +242,10 @@ namespace TwilioConference.DataServices
                 {
                     TwilioConferenceCall found = _dbContext.TwilioConferenceCalls
                       .Where(c => c.CallIsActive
-                                && c.ConferenceSID != null
-                                  && c.TwilioPhoneNumber == twilioPhonenumber)
-                      .OrderByDescending(c => c.CallStartTime).SingleOrDefault();
-
+                            && c.ConferenceSID != null
+//                            && c.ConferenceStartTime != null
+                            && c.TwilioPhoneNumber == twilioPhonenumber)
+                            .OrderByDescending(c => c.CallStartTime).SingleOrDefault();
                     if (found != null)
                     {
                         conferenceName = found.ConferenceName;
@@ -260,8 +260,11 @@ namespace TwilioConference.DataServices
             }
             catch (Exception ex)
             {
-                ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
-                    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+                ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
+                   ex.Message,
+                   ex.Source,
+                   ex.StackTrace,
+                   ex.InnerException));
             }
             return conferenceName;
         }
@@ -280,8 +283,11 @@ namespace TwilioConference.DataServices
             }
             catch (Exception ex)
             {
-                ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
-                    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+                ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
+                   ex.Message,
+                   ex.Source,
+                   ex.StackTrace,
+                   ex.InnerException));
             }
             return found;
         }
@@ -300,8 +306,11 @@ namespace TwilioConference.DataServices
             }
             catch (Exception ex)
             {
-                ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
-                    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+                ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
+                   ex.Message,
+                   ex.Source,
+                   ex.StackTrace,
+                   ex.InnerException));
 
                 throw;
             }
@@ -322,8 +331,11 @@ namespace TwilioConference.DataServices
             }
             catch (Exception ex)
             {
-                ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
-                    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+                ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
+                   ex.Message,
+                   ex.Source,
+                   ex.StackTrace,
+                   ex.InnerException));
 
                 throw;
             }
@@ -347,8 +359,11 @@ namespace TwilioConference.DataServices
             }
             catch (Exception ex)
             {
-                ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
-                    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+                ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
+                   ex.Message,
+                   ex.Source,
+                   ex.StackTrace,
+                   ex.InnerException));
             }
         }
 
@@ -396,8 +411,11 @@ namespace TwilioConference.DataServices
             }
             catch (Exception ex)
             {
-                ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
-                    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+                ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
+                   ex.Message,
+                   ex.Source,
+                   ex.StackTrace,
+                   ex.InnerException));
             }
             return retVal;
         }
@@ -421,8 +439,11 @@ namespace TwilioConference.DataServices
             }
             catch (Exception ex)
             {
-                ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
-                    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+                ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
+                   ex.Message,
+                   ex.Source,
+                   ex.StackTrace,
+                   ex.InnerException));
                 throw;
             }
             return retVal;
@@ -478,8 +499,11 @@ namespace TwilioConference.DataServices
             }
             catch (Exception ex)
             {
-                ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
-                    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+                ErrorMessage(string.Format("|Error Message - {0}| 1.Source {1} | 2.Trace {2} |3.Inner Exception {3} |",
+                   ex.Message,
+                   ex.Source,
+                   ex.StackTrace,
+                   ex.InnerException));
                 throw;
             }
             return retVal;
@@ -502,8 +526,15 @@ namespace TwilioConference.DataServices
             }
             catch (Exception ex)
             {
-                ErrorMessage(string.Format("Error Message - {0} 1.Source {1}  2.Trace {2} 3.Inner Exception {3} ",
-                    ex.Message, ex.Source, ex.StackTrace, ex.InnerException));
+                ErrorMessage(string.Format(
+                    "|Error Message - {0}" +
+                    "| 1.Source {1} " +
+                    "| 2.Trace {2} " +
+                    "| 3.Inner Exception {3} |",
+                    ex.Message,
+                    ex.Source,
+                    ex.StackTrace,
+                    ex.InnerException));
                 throw;
             }
         }

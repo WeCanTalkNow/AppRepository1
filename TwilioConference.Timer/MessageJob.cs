@@ -34,7 +34,7 @@ namespace TwilioConference.Timer
             ////   , TWILIO_BOT_NUMBER);
             ////conferenceServices.LogMessage(dataMapValues, id);
             conferenceServices.LogMessage(string.Format("Step 8 Message Job  begin: {0}", conferenceSid),8, id);
-            string connectUrl = string.Format("http://callingservicetest.azurewebsites.net//twilioconference/ConnectTwilioBotMessage?id={0}",0, id);
+            string connectUrl = string.Format("http://callingservicetest.azurewebsites.net//twilioconference/ConnectTwilioBotMessage?id={0}", id);
             
             try
             {
@@ -43,8 +43,6 @@ namespace TwilioConference.Timer
                     string.Format("https://api.twilio.com/2010-04-01/Accounts/{0}/Calls.json", twilloAccountSid);
                 WebRequest myReq = WebRequest.Create(postUrl);                
                 string credentials = string.Format("{0}:{1}", twilloAccountSid, twilloAccountToken);
-//                CredentialCache mycache = new CredentialCache();
-
                 myReq.Headers["Authorization"] = "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes(credentials));
                 string formencodeddata = string.Format("To=+1{0}&From=+1{1}&Url={2}"
                     , SERVICE_USER_TWILIO_PHONE_NUMBER
@@ -53,9 +51,9 @@ namespace TwilioConference.Timer
                 byte[] formbytes = System.Text.ASCIIEncoding.Default.GetBytes(formencodeddata);
                 myReq.Method = "POST";                
                 myReq.ContentType = "application/x-www-form-urlencoded";
-                conferenceServices.LogMessage("credentials " + credentials.ToString(), 8,id);
-                conferenceServices.LogMessage("get request stream " + myReq.GetRequestStream(), 8, id);
-                conferenceServices.LogMessage("formencodeddata " + formencodeddata.ToString(), 8, id);
+                //conferenceServices.LogMessage("credentials " + credentials.ToString(), 8,id);
+                //conferenceServices.LogMessage("get request stream " + myReq.GetRequestStream(), 8, id);
+                //conferenceServices.LogMessage("formencodeddata " + formencodeddata.ToString(), 8, id);
                 using (Stream postStream = myReq.GetRequestStream())
                 {
                     postStream.Write(formbytes, 0, formbytes.Length);
@@ -65,8 +63,8 @@ namespace TwilioConference.Timer
                 WebResponse webResponse = myReq.GetResponse();
                 Stream receiveStream = webResponse.GetResponseStream();
                 StreamReader reader = new StreamReader(receiveStream, Encoding.UTF8);
-                string content = reader.ReadToEnd();
-                conferenceServices.LogMessage(content, id);
+                //string content = reader.ReadToEnd();
+                //conferenceServices.LogMessage(content, id);
                 reader.Close();
                 reader.Dispose();
                 receiveStream.Close();

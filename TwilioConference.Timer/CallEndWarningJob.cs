@@ -42,7 +42,6 @@ namespace TwilioConference.Timer
                     string.Format("https://api.twilio.com/2010-04-01/Accounts/{0}/Calls.json", twilloAccountSid);
                 WebRequest myReq = WebRequest.Create(postUrl);
                 string credentials = string.Format("{0}:{1}", twilloAccountSid, twilloAccountToken);
-//                CredentialCache mycache = new CredentialCache();
                 myReq.Headers["Authorization"] = "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes(credentials));
                 string formencodeddata = string.Format("To=+1{0}&From=+1{1}&Url={2}"
                     , SERVICE_USER_TWILIO_PHONE_NUMBER
@@ -51,9 +50,9 @@ namespace TwilioConference.Timer
                 byte[] formbytes = System.Text.ASCIIEncoding.Default.GetBytes(formencodeddata);
                 myReq.Method = "POST";
                 myReq.ContentType = "application/x-www-form-urlencoded";
-                conferenceServices.LogMessage("credentials " + credentials.ToString(), 9, id);
-                conferenceServices.LogMessage("get request stream " + myReq.GetRequestStream(), 9, id);
-                conferenceServices.LogMessage("formencodeddata " + formencodeddata.ToString(), 9, id);
+                //conferenceServices.LogMessage("credentials " + credentials.ToString(), 9, id);
+                //conferenceServices.LogMessage("get request stream " + myReq.GetRequestStream(), 9, id);
+                //conferenceServices.LogMessage("formencodeddata " + formencodeddata.ToString(), 9, id);
 
                 using (Stream postStream = myReq.GetRequestStream())
                 {
@@ -63,7 +62,7 @@ namespace TwilioConference.Timer
                 WebResponse wr = myReq.GetResponse();
                 Stream receiveStream = wr.GetResponseStream();
                 StreamReader reader = new StreamReader(receiveStream, Encoding.UTF8);
-                string content = reader.ReadToEnd();
+                //string content = reader.ReadToEnd();
                 //conferenceServices.LogMessage(content, id);
                 reader.Close();
                 reader.Dispose();
