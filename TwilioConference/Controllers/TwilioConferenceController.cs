@@ -27,6 +27,7 @@ namespace TwilioConference.Controllers
         // For API authorization
         static readonly string TWILIO_ACCOUNT_SID = ConfigurationManager.AppSettings["TWILIO_ACCOUNT_SID"];
         static readonly string TWILIO_ACCOUNT_TOKEN = ConfigurationManager.AppSettings["TWILIO_ACCOUNT_TOKEN"];
+        static readonly int TIMEOUT_INTERVAL = 30;
 
         // 1. This is the TWILIO phone number used as a BOT to play the message
         // Obtained from web config
@@ -49,7 +50,6 @@ namespace TwilioConference.Controllers
 
         const string strUTCTimeZoneID = "Etc/UTC";
         static string strTargetTimeZoneID = "";
-
         
         Boolean AVAILABILITY_CHECK_DONE = false;
         Boolean IsUserAvailableToTakeCalls = true;
@@ -62,7 +62,6 @@ namespace TwilioConference.Controllers
         double messageIntervalinSeconds;
         double hangupIntervalinSeconds;
         double warningIntervalinSeconds;
-        
 
         private TwilioConferenceServices conferenceServices = new TwilioConferenceServices();
         private bool UserConnected;
@@ -120,9 +119,9 @@ namespace TwilioConference.Controllers
                     IsUserAvailableToTakeCalls = conferenceServices.
                         CheckAvailabilityAndFetchDetails(
                         SERVICE_USER_TWILIO_PHONE_NUMBER.Substring(2),
-                            ref strCallServiceUserName,
-                                ref SERVICE_USER_CONFERENCE_WITH_NUMBER,
-                                    ref strTargetTimeZoneID);
+                        ref strCallServiceUserName,
+                        ref SERVICE_USER_CONFERENCE_WITH_NUMBER,
+                        ref strTargetTimeZoneID);
 
                     
                     if (!IsUserAvailableToTakeCalls)
@@ -180,15 +179,13 @@ namespace TwilioConference.Controllers
                 Boolean callStartAtTimeSlot =
                     CallStartAtTimeSlot(
                       targetCallStartTime.LocalDateTime.Minute,
-                        targetCallStartTime.LocalDateTime.Second,
-                          ref intMinutesToPause,
-                            ref intSecondsToPause,
-                               ref strHourMessage,
-                                 ref messageIntervalinSeconds,
-                                   ref hangupIntervalinSeconds,
-                                     ref warningIntervalinSeconds);
-
-                
+                      targetCallStartTime.LocalDateTime.Second,
+                      ref intMinutesToPause,
+                      ref intSecondsToPause,
+                      ref strHourMessage,
+                      ref messageIntervalinSeconds,
+                      ref hangupIntervalinSeconds,
+                      ref warningIntervalinSeconds);
 
                 response.Say("You've reached the line of " + strCallServiceUserName);
                 response.Pause(1);
@@ -231,8 +228,8 @@ namespace TwilioConference.Controllers
                     TwilioConferenceCall conferenceRecord =
                         conferenceServices
                         .CreateTwilioConferenceRecord
-                            (phoneFrom, phoneTo, SERVICE_USER_TWILIO_PHONE_NUMBER, conferenceName, request.CallSid,
-                             hangupIntervalinSeconds, messageIntervalinSeconds, warningIntervalinSeconds, ToDateTime(targetCallStartTime));
+                          (phoneFrom, phoneTo, SERVICE_USER_TWILIO_PHONE_NUMBER, conferenceName, request.CallSid,
+                          hangupIntervalinSeconds, messageIntervalinSeconds, warningIntervalinSeconds, ToDateTime(targetCallStartTime));
 
                     conferenceServices.LogMessage(string.Concat("|Step 2 Connecting Caller |",
                         string.Format("|Connect From {0} " +
@@ -285,7 +282,7 @@ namespace TwilioConference.Controllers
                 };
                 UserConnected = false;
                 dial.TimeLimit = 600;  // Set total time limit of call
-                dial.Timeout = 30;     // Set total timeout for call (System hangs up after time limit)
+                dial.Timeout = TIMEOUT_INTERVAL;     // Set total timeout for call (System hangs up after time limit)
                 dial.Conference(
                     name: conferenceName                                                                               
                     , waitUrl: new Uri("http://callingservicetest.azurewebsites.net//twilioconference/ReturnHoldMusicURI")
@@ -355,7 +352,8 @@ namespace TwilioConference.Controllers
                                                                ,0,conferenceid);
 
                 var dial = new Dial();
-                var x = dial.Conference(conferenceName);
+                var x = dial.Conference(conferenceName,
+                        beep: Conference.BeepEnum.True);
                 response.Append(dial);
 
             }
@@ -434,7 +432,7 @@ namespace TwilioConference.Controllers
                             // TODO 
                             // (Use Timer.exe to disconnect call)
                             // Disconnect the call
-                            //ConferenceResource.Update(request.ConferenceSid, status: ConferenceResource.UpdateStatusEnum.Completed);
+                            ConferenceResource.Update(request.ConferenceSid, status: ConferenceResource.UpdateStatusEnum.Completed);
                         }
                     }
                     break;
@@ -899,7 +897,7 @@ namespace TwilioConference.Controllers
                 }
 
                 var dial = new Dial();
-                dial.Timeout = 30;
+                dial.Timeout = TIMEOUT_INTERVAL;
                 dial.Conference(conferenceName);
                 response.Append(dial);
                 
@@ -1024,7 +1022,7 @@ namespace TwilioConference.Controllers
                  statusCallbackEvent : statusCallbackEventlist,
                  statusCallback : new Uri(string.Format("http://callingservicetest.azurewebsites.net//twilioconference/HandleCallStatusCallback?id={0}&conferenceSid={1}&conferenceName={2}&TwilioPhoneNumber={3}", conferenceRecordId,ConferenceSid,conferenceName, TwilioPhoneNumber)),
                  statusCallbackMethod: Twilio.Http.HttpMethod.Post,
-                 timeout:30,                                         // Number of seconds that the system wil attempt to make call (after which the system will hang up                    
+                 timeout:TIMEOUT_INTERVAL,                                      // Number of seconds that the system wil attempt to make call (after which the system will hang up                    
                  url: new Uri(string.Format("http://callingservicetest.azurewebsites.net//twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}",conferenceName,conferenceRecordId)));
 
                  callSID = call.Sid;
