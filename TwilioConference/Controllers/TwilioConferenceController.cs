@@ -285,12 +285,12 @@ namespace TwilioConference.Controllers
                 dial.Timeout = TIMEOUT_INTERVAL;     // Set total timeout for call (System hangs up after time limit)
                 dial.Conference(
                     name: conferenceName                                                                               
-                    , waitUrl: new Uri("https://callingservicetrial.azurewebsites.net//twilioconference/ReturnHoldMusicURI")
+                    , waitUrl: new Uri("https://callingserviceproduction.azurewebsites.net//twilioconference/ReturnHoldMusicURI")
                     , statusCallbackEvent: statusCallbackEventlist
-                    , statusCallback: new Uri(string.Format("https://callingservicetrial.azurewebsites.net//twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id))
+                    , statusCallback: new Uri(string.Format("https://callingserviceproduction.azurewebsites.net//twilioconference/HandleConferenceStatusCallback?id={0}", conferenceRecord.Id))
                     , statusCallbackMethod: Twilio.Http.HttpMethod.Post
                     , startConferenceOnEnter: true
-                    , beep: Conference.BeepEnum.Onenter                 
+                    , beep: Conference.BeepEnum.Onenter                                     
                     , endConferenceOnExit: true);
 
                 response.Append(dial);
@@ -721,13 +721,13 @@ namespace TwilioConference.Controllers
                 switch (errorCode)
                 {
                     case "failed":
-                        connectUrl = string.Format("https://callingservicetrial.azurewebsites.net//twilioconference/ConnectTwilioBotFailedStatus?conferenceID={0}",conferenceRecordId);
+                        connectUrl = string.Format("https://callingserviceproduction.azurewebsites.net//twilioconference/ConnectTwilioBotFailedStatus?conferenceID={0}",conferenceRecordId);
                         break;
                     case "no-answer":
-                        connectUrl = string.Format("https://callingservicetrial.azurewebsites.net//twilioconference/ConnectTwilioBotNoAnswerStatus?conferenceID={0}", conferenceRecordId);
+                        connectUrl = string.Format("https://callingserviceproduction.azurewebsites.net//twilioconference/ConnectTwilioBotNoAnswerStatus?conferenceID={0}", conferenceRecordId);
                         break;
                     case "busy":
-                        connectUrl = string.Format("https://callingservicetrial.azurewebsites.net//twilioconference/ConnectTwilioBotBusyStatus?conferenceID={0}", conferenceRecordId);
+                        connectUrl = string.Format("https://callingserviceproduction.azurewebsites.net//twilioconference/ConnectTwilioBotBusyStatus?conferenceID={0}", conferenceRecordId);
                         break;
                     default:
                         break;
@@ -776,7 +776,7 @@ namespace TwilioConference.Controllers
                 var call = CallResource.Create(
                 to: new PhoneNumber(SERVICE_USER_TWILIO_PHONE_NUMBER)
                 , from: new PhoneNumber("1" + TWILIO_BOT_NUMBER)
-                , url: new Uri(connectUrl)
+                , url: new Uri(connectUrl)                
                 , method: Twilio.Http.HttpMethod.Post);
 
                 #region Experimental Code
@@ -889,7 +889,7 @@ namespace TwilioConference.Controllers
                 //response.Say("We are going to conference you in with :");
 
 
-                response.Say("Conferencing you with ");
+                response.Say("We are about to Conference you with ");
 
                 foreach (var digit in conferenceRecord.PhoneFrom)
                 {
@@ -1020,10 +1020,10 @@ namespace TwilioConference.Controllers
                  from: new PhoneNumber(TwilioPhoneNumber),
                  to: new PhoneNumber(phoneTo),
                  statusCallbackEvent : statusCallbackEventlist,
-                 statusCallback : new Uri(string.Format("https://callingservicetrial.azurewebsites.net//twilioconference/HandleCallStatusCallback?id={0}&conferenceSid={1}&conferenceName={2}&TwilioPhoneNumber={3}", conferenceRecordId,ConferenceSid,conferenceName, TwilioPhoneNumber)),
+                 statusCallback : new Uri(string.Format("https://callingserviceproduction.azurewebsites.net//twilioconference/HandleCallStatusCallback?id={0}&conferenceSid={1}&conferenceName={2}&TwilioPhoneNumber={3}", conferenceRecordId,ConferenceSid,conferenceName, TwilioPhoneNumber)),
                  statusCallbackMethod: Twilio.Http.HttpMethod.Post,
                  timeout:TIMEOUT_INTERVAL,                                      // Number of seconds that the system wil attempt to make call (after which the system will hang up                    
-                 url: new Uri(string.Format("https://callingservicetrial.azurewebsites.net//twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}",conferenceName,conferenceRecordId)));
+                 url: new Uri(string.Format("https://callingserviceproduction.azurewebsites.net//twilioconference/ConferenceInPerson2?conferenceName={0}&id={1}",conferenceName,conferenceRecordId)));
 
                  callSID = call.Sid;
             }
