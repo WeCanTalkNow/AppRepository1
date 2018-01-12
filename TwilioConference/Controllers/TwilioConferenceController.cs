@@ -71,8 +71,9 @@ namespace TwilioConference.Controllers
         #region Constructor
 
         public TwilioConferenceController() 
-        {            
+        {
             //conferenceServices.LogMessage("In contructor");
+            TwilioClient.Init(TWILIO_ACCOUNT_SID, TWILIO_ACCOUNT_TOKEN);
         }
 
         #endregion
@@ -98,6 +99,10 @@ namespace TwilioConference.Controllers
 
              string SERVICE_USER_TWILIO_PHONE_NUMBER = "";
             //conferenceServices.LogMessage("In connect");
+            var starttime = DateTime.Now;
+            DateTime stoptime;
+            var elapsedtime = 0;
+
             var response = new VoiceResponse();
             string fromPhoneNumber = request.From;
             SERVICE_USER_TWILIO_PHONE_NUMBER = request.To;
@@ -109,11 +114,12 @@ namespace TwilioConference.Controllers
                 return new TwiMLResult(response);
             }
 
+            
             if (!AVAILABILITY_CHECK_DONE)
             {
                 try
                 {
-                    TwilioClient.Init(TWILIO_ACCOUNT_SID, TWILIO_ACCOUNT_TOKEN);
+                    //TwilioClient.Init(TWILIO_ACCOUNT_SID, TWILIO_ACCOUNT_TOKEN);
 
                     // Step 1
                     IsUserAvailableToTakeCalls = conferenceServices.
@@ -187,18 +193,21 @@ namespace TwilioConference.Controllers
                       ref hangupIntervalinSeconds,
                       ref warningIntervalinSeconds);
 
-                response.Say("You've reached the line of " + strCallServiceUserName);
+                response.Say(string.Format("You've reached the line of {0} ", strCallServiceUserName));
                 response.Pause(1);
 
                     if (!callStartAtTimeSlot)
                     {
                         response.Say("You will be connected in " + intMinutesToPause.ToString());
                         response.Say("minutes and " + intSecondsToPause.ToString() + " seconds " + strHourMessage);
-                        response.Pause(1);
                         response.Say("Please hold ");
+                        response.Pause(1);
 
+                    stoptime = DateTime.Now;
+                    elapsedtime = (stoptime - starttime).Seconds;
+                    //conferenceServices.LogMessage(string.Format("stoptime {0} startime {1} elapsedtime {2} ", stoptime, starttime, elapsedtime));
                     // PRODUCTION CHANGE  (Uncomment line below)
-                    response.Pause(((intMinutesToPause * 60) + intSecondsToPause) - 2);
+                    response.Pause(((intMinutesToPause * 60) + intSecondsToPause) - (elapsedtime + 14));
 
                     #region Experimental Code
                     // This snippet of code was originally intended to list out multiple conferences from Twilio
@@ -248,7 +257,8 @@ namespace TwilioConference.Controllers
                                    "|Seconds to pause {13}|" +
                                    "|messageIntervalinSeconds {14} |" +
                                    "|hangupIntervalinSeconds {15}| " +
-                                   "|warningIntervalinSeconds {16}| "
+                                   "|warningIntervalinSeconds {16}| " +
+                                   "|elapsedtime {17}| "
                                    , phoneFrom
                                    , phoneTo
                                    , SERVICE_USER_CONFERENCE_WITH_NUMBER
@@ -266,6 +276,7 @@ namespace TwilioConference.Controllers
                                    , messageIntervalinSeconds
                                    , hangupIntervalinSeconds
                                    , warningIntervalinSeconds
+                                   , elapsedtime  
                                    ))
                                    ,2, 
                                    conferenceRecord.Id);
@@ -734,7 +745,7 @@ namespace TwilioConference.Controllers
                 }
 
                 // Authorize 
-                TwilioClient.Init(TWILIO_ACCOUNT_SID, TWILIO_ACCOUNT_TOKEN);
+                //TwilioClient.Init(TWILIO_ACCOUNT_SID, TWILIO_ACCOUNT_TOKEN);
 
                 #region Experimental Code
                 //                string postUrl =
