@@ -29,7 +29,7 @@ namespace CallingService.Voice.Controllers
             //var message = new Message();
             var strResponse = string.Empty;
             var smsMC = request.Body.ToString();
-            
+            // The line below added just for use with MagicJack. To be uncommented in case of use with MJ
             //response.Message(EvaluateMessage(request.Body.ToString().Substring(1).ToUpper().Trim()), smsFromPhonenumber, twilioPhoneNumber);
             response.Message(EvaluateMessage(request.Body.ToString().ToUpper().Trim()), smsFromPhonenumber, twilioPhoneNumber);
             //response.Message("Test message", smsFromPhonenumber, twilioPhoneNumber);
