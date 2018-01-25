@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwilioConference.Timer", "T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwilioConference.DataServices", "TwilioConference.DataServices\TwilioConference.DataServices.csproj", "{3B3F9A89-1EF1-440D-ADFF-11B2E2F658DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwilioConference.SMS", "CallingService.SMS\TwilioConference.SMS.csproj", "{B9A789D7-8068-4B26-BF85-BEF64F0A6FF8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwilioConference.SMS", "TwilioConference.SMS\TwilioConference.SMS.csproj", "{12A5BE41-3F9D-4685-8E66-15626AB3D10D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{3B3F9A89-1EF1-440D-ADFF-11B2E2F658DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B3F9A89-1EF1-440D-ADFF-11B2E2F658DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B3F9A89-1EF1-440D-ADFF-11B2E2F658DB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B9A789D7-8068-4B26-BF85-BEF64F0A6FF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B9A789D7-8068-4B26-BF85-BEF64F0A6FF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B9A789D7-8068-4B26-BF85-BEF64F0A6FF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B9A789D7-8068-4B26-BF85-BEF64F0A6FF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12A5BE41-3F9D-4685-8E66-15626AB3D10D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12A5BE41-3F9D-4685-8E66-15626AB3D10D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12A5BE41-3F9D-4685-8E66-15626AB3D10D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12A5BE41-3F9D-4685-8E66-15626AB3D10D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

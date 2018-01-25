@@ -1,7 +1,7 @@
 ﻿using System.Web;
 using System.Web.Mvc;
 
-namespace CallingService.SMS
+namespace CallingService.Voice
 {
     public class FilterConfig
     {

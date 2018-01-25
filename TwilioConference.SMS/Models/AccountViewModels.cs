@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace CallingService.SMS.Models
+namespace CallingService.Voice.Models
 {
     public class ExternalLoginConfirmationViewModel
     {

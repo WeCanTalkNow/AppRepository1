@@ -1,8 +1,8 @@
 ﻿using Microsoft.Owin;
 using Owin;
 
-[assembly: OwinStartupAttribute(typeof(CallingService.SMS.Startup))]
-namespace CallingService.SMS
+[assembly: OwinStartupAttribute(typeof(CallingService.Voice.Startup))]
+namespace CallingService.Voice
 {
     public partial class Startup
     {

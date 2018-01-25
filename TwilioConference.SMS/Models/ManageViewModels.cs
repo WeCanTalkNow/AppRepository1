@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNet.Identity;
 using Microsoft.Owin.Security;
 
-namespace CallingService.SMS.Models
+namespace CallingService.Voice.Models
 {
     public class IndexViewModel
     {

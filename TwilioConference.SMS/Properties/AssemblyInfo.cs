@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("CallingService.SMS")]
+[assembly: AssemblyTitle("CallingService.Voice")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("CallingService.SMS")]
+[assembly: AssemblyProduct("CallingService.Voice")]
 [assembly: AssemblyCopyright("Copyright ©  2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("863ee8bb-bd28-4338-a221-e91f85f12879")]
+[assembly: Guid("dcf9abde-f070-4cbc-923b-2a984b26d050")]
 
 // Version information for an assembly consists of the following four values:
 //

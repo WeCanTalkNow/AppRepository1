@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
-namespace CallingService.SMS.Controllers
+namespace CallingService.Voice.Controllers
 {
     public class HomeController : Controller
     {
